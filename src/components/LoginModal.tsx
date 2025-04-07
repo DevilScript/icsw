@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -11,7 +11,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Github, Twitter } from "lucide-react";
+import { Github, Twitter, Loader2 } from "lucide-react";
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 interface LoginModalProps {
   open: boolean;
@@ -19,9 +22,53 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { signIn, loading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    
+    if (!email || !password) {
+      setAuthError('Please enter both email and password');
+      return;
+    }
+    
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        setAuthError(error.message);
+        toast({
+          variant: "destructive",
+          title: "Sign in failed",
+          description: error.message,
+        });
+      } else {
+        onOpenChange(false); // Close the modal on success
+        navigate('/'); // Redirect to home page
+      }
+    } catch (err: any) {
+      setAuthError(err.message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err.message,
+      });
+    }
+  };
+
+  const navigateToSignUp = () => {
+    onOpenChange(false); // Close the modal
+    navigate('/auth?tab=signup'); // Navigate to auth page with signup tab active
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/40 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.3)]">
+      <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.2)]">
         <DialogHeader>
           <DialogTitle className="text-xl text-center text-white">Welcome Back</DialogTitle>
           <DialogDescription className="text-center text-gray-400">
@@ -29,14 +76,17 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
+        <form onSubmit={handleSignIn} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="email" className="text-white">Email</Label>
             <Input
               id="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
-              className="bg-gray-900/50 border-pastelPink/40 text-white focus:border-pastelPink"
+              className="bg-gray-900/50 border-pastelPink/30 text-white focus:border-pastelPink/50"
+              disabled={loading}
             />
           </div>
           
@@ -45,12 +95,30 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
             <Input
               id="password"
               type="password"
-              className="bg-gray-900/50 border-pastelPink/40 text-white focus:border-pastelPink"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-gray-900/50 border-pastelPink/30 text-white focus:border-pastelPink/50"
+              disabled={loading}
             />
           </div>
           
-          <Button className="bg-gray-700/90 hover:bg-gray-600/90 text-white border border-pastelPink w-full shadow-[0_0_10px_rgba(255,179,209,0.2)]">
-            Sign In
+          {authError && (
+            <div className="text-red-400 text-sm">{authError}</div>
+          )}
+          
+          <Button 
+            type="submit"
+            className="bg-gray-700/90 hover:bg-gray-600/90 text-white border border-pastelPink/30 w-full shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </Button>
           
           <div className="relative my-2">
@@ -63,22 +131,26 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="border-pastelPink/40 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
+            <Button variant="outline" className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
               <Github className="mr-2 h-4 w-4" />
               GitHub
             </Button>
-            <Button variant="outline" className="border-pastelPink/40 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
+            <Button variant="outline" className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
               <Twitter className="mr-2 h-4 w-4" />
               Twitter
             </Button>
           </div>
-        </div>
+        </form>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
           <Button variant="link" className="text-pastelPink hover:text-white transition-colors">
             Forgot password?
           </Button>
-          <Button variant="link" className="text-pastelPink hover:text-white transition-colors">
+          <Button 
+            variant="link" 
+            onClick={navigateToSignUp}
+            className="text-pastelPink hover:text-white transition-colors"
+          >
             Create account
           </Button>
         </DialogFooter>

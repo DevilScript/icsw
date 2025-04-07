@@ -7,7 +7,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-blue-900/30 backdrop-blur-lg border-t border-pastelPink/20 py-12 px-4">
+    <footer className="bg-gradient-to-b from-darkGray/30 to-deepBlack/90 backdrop-blur-lg border-t border-pastelPink/20 py-12 px-4">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
           <div className="flex items-center gap-2 mb-6 md:mb-0">
@@ -16,17 +16,11 @@ const Footer = () => {
           </div>
           
           <div className="flex flex-wrap justify-center gap-6">
-            <a href="#download" className="text-gray-300 hover:text-pastelPink transition-colors">
-              Download
-            </a>
             <a href="#scripts" className="text-gray-300 hover:text-pastelPink transition-colors">
               Scripts
             </a>
             <a href="#features" className="text-gray-300 hover:text-pastelPink transition-colors">
               Features
-            </a>
-            <a href="#community" className="text-gray-300 hover:text-pastelPink transition-colors">
-              Community
             </a>
             <a href="#" className="text-gray-300 hover:text-pastelPink transition-colors">
               Documentation

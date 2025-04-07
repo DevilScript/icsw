@@ -1,18 +1,29 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import ScriptSection from '@/components/ScriptSection';
-import DownloadSection from '@/components/DownloadSection';
-import Community from '@/components/Community';
 import Footer from '@/components/Footer';
 import LoginModal from '@/components/LoginModal';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Handle login button click
+  const handleLoginClick = () => {
+    if (user) {
+      // If logged in, navigate to profile or dashboard in the future
+      return;
+    }
+    setLoginModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-deepBlack via-darkGray/70 to-deepBlack text-white relative overflow-x-hidden">
@@ -29,8 +40,8 @@ const Index = () => {
       {/* Login button (fixed position) */}
       <div className="fixed bottom-6 right-6 z-40 md:hidden">
         <Button 
-          onClick={() => setLoginModalOpen(true)}
-          className="rounded-full glass-effect border border-pastelPink h-14 w-14 p-0 flex items-center justify-center shadow-[0_0_15px_rgba(255,179,209,0.3)]"
+          onClick={handleLoginClick}
+          className="rounded-full glass-effect border border-pastelPink/30 h-14 w-14 p-0 flex items-center justify-center shadow-[0_0_15px_rgba(255,179,209,0.2)]"
         >
           <User className="h-6 w-6" />
         </Button>
@@ -38,12 +49,10 @@ const Index = () => {
       
       {/* Main content */}
       <div className="relative z-10">
-        <Navbar onLoginClick={() => setLoginModalOpen(true)} />
+        <Navbar onLoginClick={handleLoginClick} />
         <Hero />
-        <Features />
         <ScriptSection />
-        <DownloadSection />
-        <Community />
+        <Features />
         <Footer />
       </div>
     </div>

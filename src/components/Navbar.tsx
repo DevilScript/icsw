@@ -6,9 +6,19 @@ import {
   MessageCircle, 
   User, 
   Menu, 
-  X 
+  X, 
+  LogOut 
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from '@/context/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -16,6 +26,13 @@ interface NavbarProps {
 
 const Navbar = ({ onLoginClick }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-lg border-b border-pastelPink/20">
@@ -23,22 +40,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Code className="text-pastelPink h-6 w-6" />
-            <span className="font-bold text-xl text-white">Neon<span className="text-pastelPink">Script</span></span>
+            <Link to="/" className="font-bold text-xl text-white">
+              Neon<span className="text-pastelPink">Script</span>
+            </Link>
           </div>
           
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center justify-center space-x-8 flex-1">
-            <a href="#download" className="text-white hover:text-pastelPink transition-colors">
-              Download
-            </a>
             <a href="#scripts" className="text-white hover:text-pastelPink transition-colors">
               Scripts
             </a>
             <a href="#features" className="text-white hover:text-pastelPink transition-colors">
               Features
-            </a>
-            <a href="#community" className="text-white hover:text-pastelPink transition-colors">
-              Community
             </a>
           </div>
 
@@ -49,13 +62,37 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               </Button>
             </a>
             
-            <Button 
-              className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink rounded-md shadow-[0_0_10px_rgba(255,179,209,0.2)]"
-              onClick={onLoginClick}
-            >
-              <User className="mr-2 h-4 w-4" />
-              Login
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    {user.email?.split('@')[0] || 'Account'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 text-white">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-700" />
+                  <DropdownMenuItem 
+                    className="hover:bg-gray-700 cursor-pointer"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+                onClick={onLoginClick}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Login
+              </Button>
+            )}
           </div>
           
           {/* Mobile menu button */}
@@ -75,13 +112,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
         <div className="md:hidden bg-black/90 backdrop-blur-lg border-b border-pastelPink/20 py-4 px-4 animate-fade-in">
           <div className="flex flex-col space-y-4">
             <a 
-              href="#download" 
-              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Download
-            </a>
-            <a 
               href="#scripts" 
               className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
               onClick={() => setIsMenuOpen(false)}
@@ -95,13 +125,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             >
               Features
             </a>
-            <a 
-              href="#community" 
-              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Community
-            </a>
             
             <div className="flex items-center gap-2 pt-2">
               <a 
@@ -113,16 +136,29 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 <MessageCircle className="h-5 w-5 mr-2" /> Discord
               </a>
               
-              <Button 
-                className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.2)]"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onLoginClick();
-                }}
-              >
-                <User className="mr-2 h-4 w-4" />
-                Login
-              </Button>
+              {user ? (
+                <Button 
+                  className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleSignOut();
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button 
+                  className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onLoginClick();
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         </div>
