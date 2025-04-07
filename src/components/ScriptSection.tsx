@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const sampleScripts = [
   {
-    name: "Hello World",
+    name: "Test",
     code: `-- Simple Hello World script
 print("Hello, NeonScript world!")
 
@@ -28,7 +28,7 @@ local message = greet("User")
 print(message)`
   },
   {
-    name: "GUI Example",
+    name: "Test",
     code: `-- GUI Example with NeonScript library
 local window = NeonUI.Window.new("My App", 800, 600)
 
@@ -46,7 +46,7 @@ window:add(button)
 window:show()`
   },
   {
-    name: "Game Loop",
+    name: "Test",
     code: `-- Simple game loop example
 local player = {
   x = 100,
