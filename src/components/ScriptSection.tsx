@@ -1,9 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Copy, Check, Code } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Copy, Check, Code, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { motion, AnimatePresence } from "framer-motion";
 
 const sampleScripts = [
   {
@@ -70,6 +77,9 @@ NeonEngine.start(update, draw)`
 const ScriptSection = () => {
   const { toast } = useToast();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [selectedScript, setSelectedScript] = useState<string>("0");
+  const [isExpanded, setIsExpanded] = useState(false);
+  const scriptRef = useRef<HTMLDivElement>(null);
 
   const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
@@ -78,13 +88,28 @@ const ScriptSection = () => {
     toast({
       title: "Script copied!",
       description: "The script has been copied to your clipboard.",
+      className: "bg-gray-800 border border-pastelPink text-white",
     });
     
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const handleScriptChange = (value: string) => {
+    setSelectedScript(value);
+    setIsExpanded(true);
+    
+    // Scroll to script if needed
+    if (scriptRef.current) {
+      setTimeout(() => {
+        scriptRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  };
+
+  const currentScript = sampleScripts[parseInt(selectedScript)];
+
   return (
-    <section id="scripts" className="py-20 px-4 bg-gradient-to-b from-blue-950/20 to-deepBlack/90">
+    <section id="scripts" className="py-20 px-4 bg-gradient-to-b from-darkGray/30 to-deepBlack/90">
       <div className="container mx-auto">
         <h2 className="section-title text-center">
           <span className="text-pastelPink">Lua</span> Scripts
@@ -94,47 +119,75 @@ const ScriptSection = () => {
           Browse example scripts to get started with NeonScript. Copy and modify these templates for your own projects.
         </p>
         
-        <Tabs defaultValue="0" className="w-full max-w-3xl mx-auto">
-          <TabsList className="grid grid-cols-3 mb-8 bg-gray-800/40 p-1 backdrop-blur-md border border-pastelPink/30 rounded-lg">
-            {sampleScripts.map((script, index) => (
-              <TabsTrigger 
-                key={index} 
-                value={index.toString()}
-                className="data-[state=active]:bg-gray-700/70 data-[state=active]:text-pastelPink data-[state=active]:shadow-[0_0_10px_rgba(255,179,209,0.3)]"
-              >
-                {script.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="max-w-3xl mx-auto">
+          {/* Script Selection Dropdown */}
+          <div className="mb-8 relative z-20">
+            <Select value={selectedScript} onValueChange={handleScriptChange}>
+              <SelectTrigger className="w-full glass-effect border border-pastelPink/40 hover:border-pastelPink/70 transition-colors text-white shadow-[0_0_10px_rgba(255,179,209,0.15)]">
+                <SelectValue placeholder="Select a script" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800/90 backdrop-blur-md border border-pastelPink/30 text-white">
+                {sampleScripts.map((script, index) => (
+                  <SelectItem 
+                    key={index} 
+                    value={index.toString()}
+                    className="text-white hover:bg-gray-700/70 hover:text-pastelPink focus:text-pastelPink"
+                  >
+                    {script.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
-          {sampleScripts.map((script, index) => (
-            <TabsContent key={index} value={index.toString()}>
-              <div className="relative bg-gray-800/40 backdrop-blur-md border border-pastelPink/30 shadow-[0_0_15px_rgba(255,179,209,0.15)] rounded-xl overflow-hidden">
+          {/* Script Display with Animation */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div 
+                ref={scriptRef}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="relative glass-effect border border-pastelPink/30 shadow-[0_0_15px_rgba(255,179,209,0.15)] rounded-xl overflow-hidden mb-4"
+              >
                 <div className="absolute top-2 right-2 z-10">
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => copyToClipboard(script.code, index)}
+                    onClick={() => copyToClipboard(currentScript.code, parseInt(selectedScript))}
                     className="bg-black/30 hover:bg-black/50 text-white border border-pastelPink/30 rounded-md"
                   >
-                    {copiedIndex === index ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+                    {copiedIndex === parseInt(selectedScript) ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
                 
                 <pre className="font-mono text-green-400 bg-black/80 p-6 overflow-x-auto max-h-[400px] overflow-y-auto text-sm">
-                  <code>{script.code}</code>
+                  <code>{currentScript.code}</code>
                 </pre>
-              </div>
-              
-              <div className="mt-4 flex justify-end">
-                <Button className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink shadow-[0_0_10px_rgba(255,179,209,0.2)] rounded-md">
-                  <Code className="mr-2 h-4 w-4" />
-                  Run in NeonScript
-                </Button>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <div className="mt-4 flex justify-end">
+            <Button 
+              className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink shadow-[0_0_10px_rgba(255,179,209,0.2)] rounded-md"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="mr-2 h-4 w-4" />
+                  Hide Script
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="mr-2 h-4 w-4" />
+                  Show Selected Script
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );

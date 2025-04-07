@@ -18,7 +18,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-blue-900/40 backdrop-blur-lg border-b border-pastelPink/20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-lg border-b border-pastelPink/20">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -72,7 +72,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-blue-900/90 backdrop-blur-lg border-b border-pastelPink/20 py-4 px-4 animate-fade-in">
+        <div className="md:hidden bg-black/90 backdrop-blur-lg border-b border-pastelPink/20 py-4 px-4 animate-fade-in">
           <div className="flex flex-col space-y-4">
             <a 
               href="#download" 
