@@ -5,7 +5,7 @@ import {
   Download, 
   Code, 
   FileText, 
-  Discord, 
+  MessageCircle, 
   User, 
   Menu, 
   X 
@@ -41,7 +41,7 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
               <Button variant="ghost" size="icon" className="text-white hover:text-neonPink hover:bg-black/30">
-                <Discord className="h-5 w-5" />
+                <MessageCircle className="h-5 w-5" />
               </Button>
             </a>
             
@@ -103,7 +103,7 @@ const Navbar = () => {
                 rel="noopener noreferrer"
                 className="text-white hover:text-neonPink px-3 py-2 rounded-md flex items-center"
               >
-                <Discord className="h-5 w-5 mr-2" /> Discord
+                <MessageCircle className="h-5 w-5 mr-2" /> Discord
               </a>
               
               <Button className="neon-button w-full mt-2">

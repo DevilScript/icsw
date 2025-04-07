@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Discord, Github, Twitter } from "lucide-react";
+import { MessageCircle, Github, Twitter } from "lucide-react";
 
 const Community = () => {
   return (
@@ -23,7 +23,7 @@ const Community = () => {
             rel="noopener noreferrer"
             className="neon-border p-8 flex flex-col items-center hover:shadow-[0_0_15px_rgba(255,42,109,0.4)] transition-all duration-300"
           >
-            <Discord className="h-12 w-12 text-neonPink mb-4" />
+            <MessageCircle className="h-12 w-12 text-neonPink mb-4" />
             <h3 className="text-xl font-semibold mb-2 text-white">Discord</h3>
             <p className="text-gray-400 mb-4">Join our server with over 10,000 members</p>
             <Button variant="outline" className="w-full border-neonPink/50 text-neonPink hover:bg-neonPink/10">
