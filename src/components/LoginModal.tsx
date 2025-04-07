@@ -21,7 +21,7 @@ interface LoginModalProps {
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="neon-border bg-darkGray sm:max-w-md">
+      <DialogContent className="bg-gray-800/90 border border-pastelPink sm:max-w-md rounded-lg">
         <DialogHeader>
           <DialogTitle className="text-xl text-center text-white">Welcome Back</DialogTitle>
           <DialogDescription className="text-center text-gray-400">
@@ -36,7 +36,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
               id="email"
               type="email"
               placeholder="your@email.com"
-              className="bg-black/50 border-gray-700 text-white"
+              className="bg-gray-900/70 border-pastelPink/50 text-white"
             />
           </div>
           
@@ -45,11 +45,11 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
             <Input
               id="password"
               type="password"
-              className="bg-black/50 border-gray-700 text-white"
+              className="bg-gray-900/70 border-pastelPink/50 text-white"
             />
           </div>
           
-          <Button className="neon-button w-full">
+          <Button className="bg-gray-700 hover:bg-gray-600 text-white border border-pastelPink w-full">
             Sign In
           </Button>
           
@@ -58,16 +58,16 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
               <div className="w-full border-t border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-darkGray px-2 text-gray-400">Or continue with</span>
+              <span className="bg-gray-800 px-2 text-gray-400">Or continue with</span>
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="border-gray-700 text-white">
+            <Button variant="outline" className="border-pastelPink/50 text-white bg-gray-700 hover:bg-gray-600">
               <Github className="mr-2 h-4 w-4" />
               GitHub
             </Button>
-            <Button variant="outline" className="border-gray-700 text-white">
+            <Button variant="outline" className="border-pastelPink/50 text-white bg-gray-700 hover:bg-gray-600">
               <Twitter className="mr-2 h-4 w-4" />
               Twitter
             </Button>
