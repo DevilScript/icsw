@@ -21,7 +21,7 @@ interface LoginModalProps {
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-800/90 border border-pastelPink sm:max-w-md rounded-lg">
+      <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/40 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.3)]">
         <DialogHeader>
           <DialogTitle className="text-xl text-center text-white">Welcome Back</DialogTitle>
           <DialogDescription className="text-center text-gray-400">
@@ -36,7 +36,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
               id="email"
               type="email"
               placeholder="your@email.com"
-              className="bg-gray-900/70 border-pastelPink/50 text-white"
+              className="bg-gray-900/50 border-pastelPink/40 text-white focus:border-pastelPink"
             />
           </div>
           
@@ -45,11 +45,11 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
             <Input
               id="password"
               type="password"
-              className="bg-gray-900/70 border-pastelPink/50 text-white"
+              className="bg-gray-900/50 border-pastelPink/40 text-white focus:border-pastelPink"
             />
           </div>
           
-          <Button className="bg-gray-700 hover:bg-gray-600 text-white border border-pastelPink w-full">
+          <Button className="bg-gray-700/90 hover:bg-gray-600/90 text-white border border-pastelPink w-full shadow-[0_0_10px_rgba(255,179,209,0.2)]">
             Sign In
           </Button>
           
@@ -63,11 +63,11 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="border-pastelPink/50 text-white bg-gray-700 hover:bg-gray-600">
+            <Button variant="outline" className="border-pastelPink/40 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
               <Github className="mr-2 h-4 w-4" />
               GitHub
             </Button>
-            <Button variant="outline" className="border-pastelPink/50 text-white bg-gray-700 hover:bg-gray-600">
+            <Button variant="outline" className="border-pastelPink/40 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
               <Twitter className="mr-2 h-4 w-4" />
               Twitter
             </Button>
@@ -75,10 +75,10 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
         </div>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-          <Button variant="link" className="text-pastelPink">
+          <Button variant="link" className="text-pastelPink hover:text-white transition-colors">
             Forgot password?
           </Button>
-          <Button variant="link" className="text-pastelPink">
+          <Button variant="link" className="text-pastelPink hover:text-white transition-colors">
             Create account
           </Button>
         </DialogFooter>

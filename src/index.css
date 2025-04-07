@@ -59,21 +59,25 @@
 
 @layer components {
   .neon-button {
-    @apply relative overflow-hidden transition-all duration-300 bg-transparent border-2 border-neonPink text-white rounded-md px-6 py-3;
+    @apply relative overflow-hidden transition-all duration-300 bg-transparent border-2 border-pastelPink text-white rounded-md px-6 py-3;
   }
 
   .neon-button:hover {
-    @apply animate-neon-pulse text-neonPink;
-    text-shadow: 0 0 5px rgba(255, 42, 109, 0.7), 0 0 10px rgba(255, 42, 109, 0.5);
+    @apply animate-neon-pulse text-pastelPink;
+    text-shadow: 0 0 5px rgba(255, 179, 209, 0.7), 0 0 10px rgba(255, 179, 209, 0.5);
   }
 
   .neon-border {
-    @apply border border-neonPink bg-darkGray/70 rounded-lg shadow-md;
-    box-shadow: 0 0 10px rgba(255, 42, 109, 0.3);
+    @apply border border-pastelPink bg-darkGray/70 rounded-lg shadow-md;
+    box-shadow: 0 0 10px rgba(255, 179, 209, 0.3);
   }
 
   .glass-card {
     @apply bg-black/30 backdrop-blur-md border border-white/10 rounded-xl;
+  }
+  
+  .glass-effect {
+    @apply bg-gray-800/40 backdrop-blur-md border border-pastelPink/30;
   }
 
   .console-text {
@@ -82,12 +86,12 @@
   }
   
   .neon-text {
-    @apply text-neonPink animate-text-flicker;
-    text-shadow: 0 0 5px rgba(255, 42, 109, 0.7), 0 0 10px rgba(255, 42, 109, 0.5);
+    @apply text-pastelPink animate-text-flicker;
+    text-shadow: 0 0 5px rgba(255, 179, 209, 0.7), 0 0 10px rgba(255, 179, 209, 0.5);
   }
   
   .section-title {
-    @apply text-2xl font-bold mb-6 text-white;
+    @apply text-2xl md:text-3xl font-bold mb-6 text-white;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
   }
   
@@ -95,3 +99,23 @@
     background: linear-gradient(135deg, rgba(10,10,10,1) 0%, rgba(26,26,26,1) 100%);
   }
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+

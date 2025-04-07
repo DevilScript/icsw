@@ -84,10 +84,10 @@ const ScriptSection = () => {
   };
 
   return (
-    <section id="scripts" className="py-20 px-4 gradient-bg">
+    <section id="scripts" className="py-20 px-4 bg-gradient-to-b from-blue-950/20 to-deepBlack/90">
       <div className="container mx-auto">
         <h2 className="section-title text-center">
-          <span className="neon-text">Lua</span> Scripts
+          <span className="text-pastelPink">Lua</span> Scripts
         </h2>
         
         <p className="text-center text-gray-300 max-w-2xl mx-auto mb-12">
@@ -95,12 +95,12 @@ const ScriptSection = () => {
         </p>
         
         <Tabs defaultValue="0" className="w-full max-w-3xl mx-auto">
-          <TabsList className="grid grid-cols-3 mb-8">
+          <TabsList className="grid grid-cols-3 mb-8 bg-gray-800/40 p-1 backdrop-blur-md border border-pastelPink/30 rounded-lg">
             {sampleScripts.map((script, index) => (
               <TabsTrigger 
                 key={index} 
                 value={index.toString()}
-                className="data-[state=active]:text-neonPink data-[state=active]:shadow-[0_0_10px_rgba(255,42,109,0.5)]"
+                className="data-[state=active]:bg-gray-700/70 data-[state=active]:text-pastelPink data-[state=active]:shadow-[0_0_10px_rgba(255,179,209,0.3)]"
               >
                 {script.name}
               </TabsTrigger>
@@ -109,25 +109,25 @@ const ScriptSection = () => {
           
           {sampleScripts.map((script, index) => (
             <TabsContent key={index} value={index.toString()}>
-              <div className="relative">
+              <div className="relative bg-gray-800/40 backdrop-blur-md border border-pastelPink/30 shadow-[0_0_15px_rgba(255,179,209,0.15)] rounded-xl overflow-hidden">
                 <div className="absolute top-2 right-2 z-10">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => copyToClipboard(script.code, index)}
-                    className="bg-black/30 hover:bg-black/50 text-white"
+                    className="bg-black/30 hover:bg-black/50 text-white border border-pastelPink/30 rounded-md"
                   >
                     {copiedIndex === index ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
                 
-                <pre className="console-text overflow-x-auto max-h-[400px] overflow-y-auto">
+                <pre className="font-mono text-green-400 bg-black/80 p-6 overflow-x-auto max-h-[400px] overflow-y-auto text-sm">
                   <code>{script.code}</code>
                 </pre>
               </div>
               
               <div className="mt-4 flex justify-end">
-                <Button className="neon-button">
+                <Button className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink shadow-[0_0_10px_rgba(255,179,209,0.2)] rounded-md">
                   <Code className="mr-2 h-4 w-4" />
                   Run in NeonScript
                 </Button>

@@ -5,10 +5,10 @@ import { MessageCircle, Github, Twitter } from "lucide-react";
 
 const Community = () => {
   return (
-    <section id="community" className="py-20 px-4 bg-gradient-to-b from-blue-900/80 to-deepBlack/90">
+    <section id="community" className="py-20 px-4 bg-gradient-to-b from-blue-900/30 to-deepBlack/90">
       <div className="container mx-auto text-center">
         <h2 className="section-title">
-          Join Our <span className="neon-text">Community</span>
+          Join Our <span className="text-pastelPink">Community</span>
         </h2>
         
         <p className="text-gray-300 max-w-2xl mx-auto mb-12">
@@ -21,12 +21,14 @@ const Community = () => {
             href="https://discord.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-gray-800/70 border border-pastelPink p-8 flex flex-col items-center hover:shadow-[0_0_15px_rgba(255,42,109,0.4)] transition-all duration-300 rounded-lg"
+            className="bg-gray-800/40 backdrop-blur-md border border-pastelPink/40 p-8 flex flex-col items-center hover:shadow-[0_0_20px_rgba(255,179,209,0.3)] transition-all duration-300 rounded-xl group"
           >
-            <MessageCircle className="h-12 w-12 text-neonPink mb-4" />
+            <div className="bg-gray-700/70 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+              <MessageCircle className="h-8 w-8 text-pastelPink" />
+            </div>
             <h3 className="text-xl font-semibold mb-2 text-white">Discord</h3>
             <p className="text-gray-400 mb-4">Join our server with over 10,000 members</p>
-            <Button variant="outline" className="w-full border-neonPink/50 text-neonPink hover:bg-neonPink/10">
+            <Button variant="outline" className="w-full border-pastelPink/60 text-pastelPink hover:bg-pastelPink/10 rounded-md">
               Join Server
             </Button>
           </a>
@@ -35,12 +37,14 @@ const Community = () => {
             href="https://github.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-gray-800/70 border border-pastelPink p-8 flex flex-col items-center hover:shadow-[0_0_15px_rgba(255,42,109,0.4)] transition-all duration-300 rounded-lg"
+            className="bg-gray-800/40 backdrop-blur-md border border-pastelPink/40 p-8 flex flex-col items-center hover:shadow-[0_0_20px_rgba(255,179,209,0.3)] transition-all duration-300 rounded-xl group"
           >
-            <Github className="h-12 w-12 text-neonPink mb-4" />
+            <div className="bg-gray-700/70 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+              <Github className="h-8 w-8 text-pastelPink" />
+            </div>
             <h3 className="text-xl font-semibold mb-2 text-white">GitHub</h3>
             <p className="text-gray-400 mb-4">Contribute to the project and report issues</p>
-            <Button variant="outline" className="w-full border-neonPink/50 text-neonPink hover:bg-neonPink/10">
+            <Button variant="outline" className="w-full border-pastelPink/60 text-pastelPink hover:bg-pastelPink/10 rounded-md">
               View Repo
             </Button>
           </a>
@@ -49,13 +53,15 @@ const Community = () => {
             href="https://twitter.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-gray-800/70 border border-pastelPink p-8 flex flex-col items-center hover:shadow-[0_0_15px_rgba(255,42,109,0.4)] transition-all duration-300 rounded-lg"
+            className="bg-gray-800/40 backdrop-blur-md border border-pastelPink/40 p-8 flex flex-col items-center hover:shadow-[0_0_20px_rgba(255,179,209,0.3)] transition-all duration-300 rounded-xl group"
           >
-            <Twitter className="h-12 w-12 text-neonPink mb-4" />
+            <div className="bg-gray-700/70 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+              <Twitter className="h-8 w-8 text-pastelPink" />
+            </div>
             <h3 className="text-xl font-semibold mb-2 text-white">Twitter</h3>
             <p className="text-gray-400 mb-4">Follow us for the latest updates and news</p>
-            <Button variant="outline" className="w-full border-neonPink/50 text-neonPink hover:bg-neonPink/10">
-              View Repo
+            <Button variant="outline" className="w-full border-pastelPink/60 text-pastelPink hover:bg-pastelPink/10 rounded-md">
+              Follow Us
             </Button>
           </a>
         </div>
