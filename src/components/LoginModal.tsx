@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Dialog, 
@@ -11,7 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Github, LogIn, Loader2, KeyRound, Instagram, Discord } from "lucide-react";
+import { Github, LogIn, Loader2, KeyRound, Instagram } from "lucide-react";
+import DiscordIcon from '@/components/icons/DiscordIcon';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -48,8 +48,8 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           description: error.message,
         });
       } else {
-        onOpenChange(false); // Close the modal on success
-        navigate('/'); // Redirect to home page
+        onOpenChange(false);
+        navigate('/');
       }
     } catch (err: any) {
       setAuthError(err.message);
@@ -75,13 +75,13 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   };
 
   const navigateToSignUp = () => {
-    onOpenChange(false); // Close the modal
-    navigate('/auth?tab=signup'); // Navigate to auth page with signup tab active
+    onOpenChange(false);
+    navigate('/auth?tab=signup');
   };
 
   const navigateToForgotPassword = () => {
-    onOpenChange(false); // Close the modal
-    navigate('/auth?tab=forgot-password'); // Navigate to auth page with forgot password tab active
+    onOpenChange(false);
+    navigate('/auth?tab=forgot-password');
   };
 
   return (
@@ -157,7 +157,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
             onClick={handleDiscordSignIn}
             disabled={loading}
           >
-            <Discord className="mr-2 h-4 w-4" />
+            <DiscordIcon className="mr-2 h-4 w-4" />
             Discord
           </Button>
         </form>

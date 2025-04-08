@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -8,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, LogIn, User, KeyRound, Mail, Discord } from 'lucide-react';
+import { Loader2, LogIn, User, KeyRound, Mail } from 'lucide-react';
+import DiscordIcon from '@/components/icons/DiscordIcon';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -20,7 +20,6 @@ const AuthPage = () => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Get the active tab from the URL
   const getTabFromUrl = () => {
     const params = new URLSearchParams(location.search);
     return params.get('tab') || 'signin';
@@ -28,12 +27,10 @@ const AuthPage = () => {
 
   const [activeTab, setActiveTab] = useState(getTabFromUrl());
 
-  // Update tab when URL changes
   useEffect(() => {
     setActiveTab(getTabFromUrl());
   }, [location]);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -244,7 +241,7 @@ const AuthPage = () => {
                     onClick={handleDiscordSignIn}
                     disabled={loading}
                   >
-                    <Discord className="mr-2 h-4 w-4" />
+                    <DiscordIcon className="mr-2 h-4 w-4" />
                     Discord
                   </Button>
                 </CardFooter>
@@ -329,7 +326,7 @@ const AuthPage = () => {
                     onClick={handleDiscordSignIn}
                     disabled={loading}
                   >
-                    <Discord className="mr-2 h-4 w-4" />
+                    <DiscordIcon className="mr-2 h-4 w-4" />
                     Discord
                   </Button>
                 </CardFooter>
