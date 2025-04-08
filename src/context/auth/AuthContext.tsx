@@ -35,16 +35,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
           
           toast({
-            title: "Welcome!",
-            description: "You have successfully signed in.",
+            title: "Notification",
+            description: "Signed in",
           });
         }
         
         if (event === 'SIGNED_OUT') {
           setUserProfile(null);
           toast({
-            title: "Signed out",
-            description: "You have been signed out.",
+            title: "Notification",
+            description: "Signed out",
           });
         }
       }
