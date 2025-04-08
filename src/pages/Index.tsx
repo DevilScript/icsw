@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 import LoginModal from '@/components/LoginModal';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {

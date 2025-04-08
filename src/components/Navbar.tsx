@@ -11,7 +11,7 @@ import {
   Instagram
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,
