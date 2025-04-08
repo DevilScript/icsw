@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User, Provider } from '@supabase/supabase-js';
@@ -42,19 +43,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserProfile = async (userId: string) => {
     try {
       // Check if the profiles table exists first
-      const { data: tableExists, error: checkError } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1)
-        .then(response => {
-          // If we can query the table, it exists
-          return { data: true, error: null };
-        })
-        .catch(error => {
-          // If we get an error, the table might not exist
-          console.error('Error checking profiles table:', error);
-          return { data: false, error };
-        });
+      let tableExists = false;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .limit(1);
+        
+        if (!error) {
+          tableExists = true;
+        }
+      } catch (error) {
+        console.error('Error checking profiles table:', error);
+        return;
+      }
       
       if (!tableExists) {
         console.log('Profiles table does not exist yet');
