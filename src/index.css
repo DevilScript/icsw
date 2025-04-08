@@ -91,7 +91,7 @@
   }
   
   .section-title {
-    @apply text-2xl md:text-3xl font-bold mb-6 text-white;
+    @apply text-2xl md:text-3xl font-bold mb-6 text-white text-center;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
   }
   
@@ -111,10 +111,26 @@
   }
 }
 
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

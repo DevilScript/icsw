@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Github, Twitter, Loader2 } from "lucide-react";
+import { Github, LogIn, Loader2, KeyRound, Instagram, Discord } from "lucide-react";
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -25,7 +25,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
-  const { signIn, loading } = useAuth();
+  const { signIn, signInWithDiscord, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -61,9 +61,27 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
     }
   };
 
+  const handleDiscordSignIn = async () => {
+    try {
+      await signInWithDiscord();
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Discord sign in failed",
+        description: err.message,
+      });
+    }
+  };
+
   const navigateToSignUp = () => {
     onOpenChange(false); // Close the modal
     navigate('/auth?tab=signup'); // Navigate to auth page with signup tab active
+  };
+
+  const navigateToForgotPassword = () => {
+    onOpenChange(false); // Close the modal
+    navigate('/auth?tab=forgot-password'); // Navigate to auth page with forgot password tab active
   };
 
   return (
@@ -72,7 +90,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
         <DialogHeader>
           <DialogTitle className="text-xl text-center text-white">Welcome Back</DialogTitle>
           <DialogDescription className="text-center text-gray-400">
-            Sign in to your NeonScript account
+            Sign in to your MoyxHubs account
           </DialogDescription>
         </DialogHeader>
         
@@ -117,7 +135,10 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
                 Signing in...
               </>
             ) : (
-              'Sign In'
+              <>
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </>
             )}
           </Button>
           
@@ -130,20 +151,24 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
-              <Github className="mr-2 h-4 w-4" />
-              GitHub
-            </Button>
-            <Button variant="outline" className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors">
-              <Twitter className="mr-2 h-4 w-4" />
-              Twitter
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors w-full"
+            onClick={handleDiscordSignIn}
+            disabled={loading}
+          >
+            <Discord className="mr-2 h-4 w-4" />
+            Discord
+          </Button>
         </form>
         
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-          <Button variant="link" className="text-pastelPink hover:text-white transition-colors">
+          <Button 
+            variant="link" 
+            className="text-pastelPink hover:text-white transition-colors"
+            onClick={navigateToForgotPassword}
+          >
+            <KeyRound className="mr-2 h-4 w-4" />
             Forgot password?
           </Button>
           <Button 

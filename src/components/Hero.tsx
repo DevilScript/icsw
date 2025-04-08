@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageCircle, ChevronDown } from "lucide-react";
+import { MessageCircle, ChevronDown, Instagram } from "lucide-react";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const contributors = [
-  { name: "Alex Chen", role: "Lead Developer", avatar: "AC" },
-  { name: "Sara Kim", role: "UI Designer", avatar: "SK" },
-  { name: "Marcus Lee", role: "Script Engineer", avatar: "ML" },
+  { name: "Moyx", role: "Lead Developer", avatar: "MX", instagram: "https://www.instagram.com/mo.icsw/" },
+  { name: "Moyx02", role: "Mod Developer", avatar: "M2", instagram: "https://www.instagram.com/mo.icsw/" },
 ];
 
 const Hero = () => {
@@ -27,8 +27,8 @@ const Hero = () => {
           transition={{ duration: 0.5 }}
           className="text-4xl md:text-6xl font-bold mb-6 tracking-tight"
         >
-          <span className="text-white">Neon</span>
-          <span className="text-pastelPink animate-pulse">Script</span>
+          <span className="text-white">Moyx</span>
+          <span className="text-pastelPink animate-pulse">Hubs</span>
           <span className="text-white"> Runner</span>
         </motion.h1>
         
@@ -51,38 +51,48 @@ const Hero = () => {
           <Button 
             id="discordBtn" 
             className="relative group overflow-hidden bg-gray-800/70 border-2 border-pastelPink/30 hover:bg-gray-700/70 text-white text-lg py-6 px-8 rounded-md shadow-[0_0_15px_rgba(255,179,209,0.2)]"
-            onClick={() => window.open('https://discord.com', '_blank')}
+            onClick={() => window.open('https://discord.gg/3CFe4KBks2', '_blank')}
           >
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-pastelPink/0 via-pastelPink/30 to-pastelPink/0 -translate-x-full animate-shimmer group-hover:animate-shimmer"></span>
             <MessageCircle className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Join Discord
           </Button>
           
-          <Button 
-            variant="outline" 
-            className="border-pastelPink/30 text-pastelPink hover:bg-pastelPink/10 rounded-md shadow-[0_0_10px_rgba(255,179,209,0.15)]"
-          >
-            View Documentation
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-pastelPink/30 text-pastelPink bg-gray-800/50 rounded-full shadow-[0_0_10px_rgba(255,179,209,0.15)] py-1 px-4">
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                Status: Online
+              </span>
+            </Badge>
+          </div>
         </motion.div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="glass-effect border border-pastelPink/20 max-w-md mx-auto p-4 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)] animate-float"
+          className="glass-effect border border-pastelPink/20 max-w-md mx-auto p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)] animate-float"
         >
-          <h3 className="text-white text-lg mb-4">Contributors</h3>
-          <div className="flex flex-col gap-3">
+          <h3 className="text-white text-lg mb-6">Contributors</h3>
+          <div className="flex flex-col gap-6">
             {contributors.map((contributor, index) => (
-              <div key={index} className="flex items-center gap-3 text-left">
-                <Avatar className="border border-pastelPink/30">
+              <div key={index} className="flex flex-col items-center">
+                <Avatar className="border border-pastelPink/30 h-16 w-16 mb-2">
                   <AvatarImage src={`/placeholder.svg`} />
-                  <AvatarFallback className="bg-gray-700 text-pastelPink">{contributor.avatar}</AvatarFallback>
+                  <AvatarFallback className="bg-gray-700 text-pastelPink text-lg">{contributor.avatar}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="text-white">{contributor.name}</p>
-                  <p className="text-xs text-gray-400">{contributor.role}</p>
+                <div className="text-center">
+                  <p className="text-white text-lg">{contributor.name}</p>
+                  <p className="text-sm text-gray-400 mb-2">{contributor.role}</p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:text-pastelPink hover:bg-black/30 rounded-full h-8 w-8"
+                    onClick={() => window.open(contributor.instagram, '_blank')}
+                  >
+                    <Instagram className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
@@ -22,11 +22,23 @@ const Index = () => {
       // If logged in, navigate to profile or dashboard in the future
       return;
     }
-    setLoginModalOpen(true);
+    navigate('/auth');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-deepBlack via-darkGray/70 to-deepBlack text-white relative overflow-x-hidden">
+      {/* Custom cursor */}
+      <style>
+        {`
+        body {
+          cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6' fill='rgba(255,179,209,0.5)' /></svg>"), auto;
+        }
+        a, button, [role="button"], select, input, label {
+          cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='10' cy='10' r='8' fill='rgba(255,179,209,0.8)' /></svg>"), pointer !important;
+        }
+        `}
+      </style>
+      
       {/* Animated background elements */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute top-1/3 left-0 w-96 h-96 bg-pastelPink/5 rounded-full filter blur-[120px]"></div>
