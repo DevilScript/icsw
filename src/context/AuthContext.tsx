@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User, Provider } from '@supabase/supabase-js';
@@ -42,35 +41,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Fetch user profile data
   const fetchUserProfile = async (userId: string) => {
     try {
-      // Check if the profiles table exists first
-      let tableExists = false;
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .limit(1);
-        
-        if (!error) {
-          tableExists = true;
-        }
-      } catch (error) {
-        console.error('Error checking profiles table:', error);
-        return;
-      }
-      
-      if (!tableExists) {
-        console.log('Profiles table does not exist yet');
-        return;
-      }
-      
+      // Try to fetch the user's profile safely
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-        
+      
       if (error) {
-        console.error('Error fetching user profile:', error);
+        if (error.code === 'PGRST116') {
+          // Table might not exist yet
+          console.log('Profiles table does not exist or is empty');
+        } else {
+          console.error('Error fetching user profile:', error);
+        }
         return;
       }
       

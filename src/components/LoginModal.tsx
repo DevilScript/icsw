@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Dialog, 
@@ -118,6 +119,15 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
               className="bg-gray-900/50 border-pastelPink/30 text-white focus:border-pastelPink/50"
               disabled={loading}
             />
+            <div className="flex justify-end">
+              <Button 
+                variant="link" 
+                className="text-xs text-pastelPink hover:text-white transition-colors p-0 h-auto"
+                onClick={navigateToForgotPassword}
+              >
+                Forgot password?
+              </Button>
+            </div>
           </div>
           
           {authError && (
@@ -162,15 +172,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </Button>
         </form>
         
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-          <Button 
-            variant="link" 
-            className="text-pastelPink hover:text-white transition-colors"
-            onClick={navigateToForgotPassword}
-          >
-            <KeyRound className="mr-2 h-4 w-4" />
-            Forgot password?
-          </Button>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-end">
           <Button 
             variant="link" 
             onClick={navigateToSignUp}
