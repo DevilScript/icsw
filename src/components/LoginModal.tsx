@@ -26,7 +26,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
-  const { signIn, signInWithDiscord, loading } = useAuth();
+  const { signIn, signInWithDiscord, resetPassword, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -75,14 +75,40 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setAuthError('Please enter your email address');
+      return;
+    }
+    
+    try {
+      const { error } = await resetPassword(email);
+      if (error) {
+        setAuthError(error.message);
+        toast({
+          variant: "destructive",
+          title: "Password reset failed",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Password reset email sent",
+          description: "Please check your email for instructions to reset your password.",
+        });
+      }
+    } catch (err: any) {
+      setAuthError(err.message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err.message,
+      });
+    }
+  };
+
   const navigateToSignUp = () => {
     onOpenChange(false);
     navigate('/auth?tab=signup');
-  };
-
-  const navigateToForgotPassword = () => {
-    onOpenChange(false);
-    navigate('/auth?tab=forgot-password');
   };
 
   return (
@@ -122,8 +148,9 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
             <div className="flex justify-end">
               <Button 
                 variant="link" 
+                type="button"
                 className="text-xs text-pastelPink hover:text-white transition-colors p-0 h-auto"
-                onClick={navigateToForgotPassword}
+                onClick={handleForgotPassword}
               >
                 Forgot password?
               </Button>

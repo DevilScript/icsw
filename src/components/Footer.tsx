@@ -12,7 +12,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-10">
           <div className="flex items-center gap-2 mb-6 md:mb-0">
             <Code className="text-pastelPink h-6 w-6" />
-            <span className="font-bold text-xl text-white">Neon<span className="text-pastelPink">Script</span></span>
+            <span className="font-bold text-xl text-white">Moyx<span className="text-pastelPink">Hubs</span></span>
           </div>
           
           <div className="flex flex-wrap justify-center gap-6">
@@ -33,7 +33,7 @@ const Footer = () => {
         
         <div className="border-t border-gray-700/50 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
-            &copy; {currentYear} NeonScript. All rights reserved.
+            &copy; {currentYear} MoyxHubs. All rights reserved.
           </p>
           
           <div className="flex gap-6">

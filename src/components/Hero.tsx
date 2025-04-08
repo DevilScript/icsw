@@ -7,8 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const contributors = [
-  { name: "Moyx", role: "Lead Developer", avatar: "MX", instagram: "https://www.instagram.com/mo.icsw/" },
-  { name: "Moyx02", role: "Mod Developer", avatar: "M2", instagram: "https://www.instagram.com/mo.icsw/" },
+  { name: "Mo🍉", role: "Lead Developer", avatar: "MO", instagram: "https://www.instagram.com/mo.icsw/" },
 ];
 
 const Hero = () => {
