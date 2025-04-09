@@ -23,12 +23,6 @@ const Footer = () => {
             <a href="#features" className="text-gray-300 hover:text-pastelPink transition-colors">
               Features
             </a>
-            <a href="#" className="text-gray-300 hover:text-pastelPink transition-colors">
-              Documentation
-            </a>
-            <a href="#" className="text-gray-300 hover:text-pastelPink transition-colors">
-              Blog
-            </a>
           </div>
         </div>
         
@@ -55,9 +49,6 @@ const Footer = () => {
             >
               <Instagram className="h-3.5 w-3.5" />
               <span className="text-sm">Instagram</span>
-            </a>
-            <a href="#" className="text-gray-400 text-sm hover:text-pastelPink transition-colors">
-              Contact
             </a>
           </div>
         </div>
