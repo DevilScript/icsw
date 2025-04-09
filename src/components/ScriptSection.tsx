@@ -156,7 +156,7 @@ const ScriptSection = () => {
     setCopiedIndex(index);
     
     toast({
-      title: "Script copied!",
+      title: "copied!",
       description: "The script has been copied to your clipboard.",
       className: "bg-gray-800 border border-pastelPink text-white",
     });
@@ -223,7 +223,7 @@ const ScriptSection = () => {
       toast({
         variant: "destructive",
         title: "Verification failed",
-        description: "There was a problem verifying your key. Please try again.",
+        description: "Please try again.",
         className: "bg-gray-800 border-red-500 text-white",
       });
     } finally {
@@ -253,7 +253,7 @@ const ScriptSection = () => {
           viewport={{ once: true }}
           className="text-center text-gray-300 max-w-2xl mx-auto mb-12"
         >
-          Browse example scripts to get started with ICSW. Copy and modify these templates for your own projects.
+          I speak Thai, but my code speaks elite.
         </motion.p>
         
         <div className="max-w-3xl mx-auto">
@@ -294,11 +294,11 @@ const ScriptSection = () => {
               <div className="flex flex-col items-center space-y-4">
                 <div className="flex items-center justify-center mb-2">
                   <Lock className="text-pastelPink mr-2 h-5 w-5 animate-pulse" />
-                  <h3 className="text-lg font-medium text-white">Enter Script Key</h3>
+                  <h3 className="text-lg font-medium text-white">ZzzZ</h3>
                 </div>
                 
                 <p className="text-sm text-gray-300 text-center max-w-md">
-                  This script requires a verification key to access. Please enter your key below.
+                  Enter your key below
                 </p>
                 
                 <div className="flex w-full max-w-md space-x-2">
@@ -308,7 +308,7 @@ const ScriptSection = () => {
                       type="text"
                       value={scriptKey}
                       onChange={(e) => setScriptKey(e.target.value)}
-                      placeholder="Enter your script key"
+                      placeholder="Moyx-xxxxxx"
                       className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink text-white placeholder:text-gray-500 pl-10"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
@@ -392,7 +392,7 @@ const ScriptSection = () => {
                 
                 <div className="flex items-center bg-black/50 px-4 py-2 border-b border-pastelPink/20">
                   <Unlock className="h-4 w-4 text-green-400 mr-2" />
-                  <span className="text-sm text-gray-300">Script unlocked</span>
+                  <span className="text-sm text-gray-300">Access</span>
                 </div>
                 
                 <motion.pre 
