@@ -16,7 +16,7 @@ export const useAuthMethods = (
         data: {
           nickname: nickname
         },
-        emailRedirectTo: 'https://neon-script-haven.lovable.app/'
+        emailRedirectTo: 'http://localhost:3000/'
       }
     });
     setLoading(false);
@@ -38,7 +38,7 @@ export const useAuthMethods = (
     await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: 'https://neon-script-haven.lovable.app/'
+        redirectTo: 'http://localhost:3000/'
       }
     });
     setLoading(false);
@@ -47,7 +47,7 @@ export const useAuthMethods = (
   const resetPassword = async (email: string) => {
     setLoading(true);
     const result = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://neon-script-haven.lovable.app/auth?tab=reset-password',
+      redirectTo: 'http://localhost:3000/auth/reset',
     });
     setLoading(false);
     return result;

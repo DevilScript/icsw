@@ -114,6 +114,18 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.2)]">
+        {/* Custom cursor */}
+        <style>
+          {`
+          body {
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6' fill='rgba(255,179,209,0.5)' /></svg>"), auto;
+          }
+          a, button, [role="button"], select, input, label {
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='10' cy='10' r='8' fill='rgba(255,179,209,0.8)' /></svg>"), pointer !important;
+          }
+          `}
+        </style>
+        
         <DialogHeader>
           <DialogTitle className="text-xl text-center text-white">Welcome Back</DialogTitle>
           <DialogDescription className="text-center text-gray-400">

@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const contributors = [
-  { name: "Mo🍉", role: "Lead Developer", avatar: "MO", instagram: "https://www.instagram.com/mo.icsw/" },
+  { name: "Mo🍉", role: "Lead Developer", avatar: "https://i.ibb.co/b5gYWz4/IMG-9301.jpg", instagram: "https://www.instagram.com/mo.icsw/" },
 ];
 
 const Hero = () => {
@@ -71,15 +71,15 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="glass-effect border border-pastelPink/20 max-w-md mx-auto p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)] animate-float"
+          className="glass-effect border border-pastelPink/20 max-w-md mx-auto p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)] animate-float mb-16"
         >
           <h3 className="text-white text-lg mb-6">Contributors</h3>
           <div className="flex flex-col gap-6">
             {contributors.map((contributor, index) => (
               <div key={index} className="flex flex-col items-center">
                 <Avatar className="border border-pastelPink/30 h-16 w-16 mb-2">
-                  <AvatarImage src={`/placeholder.svg`} />
-                  <AvatarFallback className="bg-gray-700 text-pastelPink text-lg">{contributor.avatar}</AvatarFallback>
+                  <AvatarImage src={contributor.avatar} />
+                  <AvatarFallback className="bg-gray-700 text-pastelPink text-lg">MO</AvatarFallback>
                 </Avatar>
                 <div className="text-center">
                   <p className="text-white text-lg">{contributor.name}</p>
@@ -98,8 +98,8 @@ const Hero = () => {
           </div>
         </motion.div>
         
-        <a href="#scripts" className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/70 hover:text-pastelPink transition-colors animate-bounce">
-          <ChevronDown className="h-8 w-8" />
+        <a href="#scripts" className="block text-center text-white/70 hover:text-pastelPink transition-colors animate-bounce">
+          <ChevronDown className="h-8 w-8 mx-auto" />
         </a>
       </div>
     </div>
