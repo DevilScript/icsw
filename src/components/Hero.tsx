@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const contributors = [
-  { name: "Mo🍉", role: "Lead Developer", avatar: "https://i.ibb.co/b5gYWz4p/IMG-9301.jpg", instagram: "https://www.instagram.com/mo.icsw/" },
+  { name: "Mo🍉", role: "Lead Developer", avatar: "https://i.ibb.co/b5gYWz4/IMG-9301.jpg", instagram: "https://www.instagram.com/mo.icsw/" },
 ];
 
 const Hero = () => {
@@ -20,16 +20,49 @@ const Hero = () => {
       </div>
       
       <div className="container mx-auto text-center relative z-10">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl md:text-6xl font-bold mb-6 tracking-tight"
+          transition={{ 
+            duration: 0.7,
+            type: "spring",
+            stiffness: 100
+          }}
+          className="mb-6"
         >
-          <span className="text-white">Moyx</span>
-          <span className="text-pastelPink animate-pulse">Hubs</span>
-          <span className="text-white"> Runner</span>
-        </motion.h1>
+          <motion.div 
+            className="text-4xl md:text-6xl font-bold tracking-tight inline-flex flex-wrap justify-center"
+            animate={{ scale: [0.9, 1, 0.98] }}
+            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+          >
+            <motion.span
+              className="text-white mr-2"
+              whileHover={{ 
+                color: "#ffb3d1", 
+                textShadow: "0 0 8px rgba(255,179,209,0.7)" 
+              }}
+            >
+              ICS
+            </motion.span>
+            <motion.span 
+              className="text-pastelPink"
+              animate={{ 
+                textShadow: ["0 0 4px rgba(255,179,209,0.4)", "0 0 15px rgba(255,179,209,0.8)", "0 0 4px rgba(255,179,209,0.4)"]
+              }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              W
+            </motion.span>
+          </motion.div>
+          <motion.span 
+            className="text-lg md:text-2xl text-gray-300 block mt-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          >
+            Runner
+          </motion.span>
+        </motion.div>
         
         <motion.p 
           initial={{ opacity: 0, y: -10 }}
@@ -98,9 +131,25 @@ const Hero = () => {
           </div>
         </motion.div>
         
-        <a href="#scripts" className="block text-center text-white/70 hover:text-pastelPink transition-colors animate-bounce">
-          <ChevronDown className="h-8 w-8 mx-auto" />
-        </a>
+        <motion.div 
+          className="relative"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
+        >
+          <a 
+            href="#scripts" 
+            className="block text-center text-white/70 hover:text-pastelPink transition-colors"
+            aria-label="Scroll down to scripts section"
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              <ChevronDown className="h-8 w-8 mx-auto" />
+            </motion.div>
+          </a>
+        </motion.div>
       </div>
     </div>
   );

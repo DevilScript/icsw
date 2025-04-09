@@ -14,6 +14,8 @@ import DiscordIcon from '@/components/icons/DiscordIcon';
 import { useAuth } from '@/context/auth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { motion } from 'framer-motion';
+import LogoW from './icons/LogoW';
 
 interface LoginModalProps {
   open: boolean;
@@ -40,7 +42,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.2)]">
+      <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.2)] overflow-hidden">
         {/* Custom cursor */}
         <style>
           {`
@@ -53,37 +55,61 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           `}
         </style>
         
+        {/* Animated border effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pastelPink/50 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pastelPink/50 to-transparent"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-pastelPink/50 to-transparent"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-pastelPink/50 to-transparent"></div>
+        </div>
+        
         <DialogHeader>
+          <motion.div 
+            className="flex justify-center mb-4"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <LogoW className="h-10 w-10 text-pastelPink" />
+          </motion.div>
+          
           <DialogTitle className="text-xl text-center text-white">Welcome Back</DialogTitle>
           <DialogDescription className="text-center text-gray-400">
-            Sign in to your MoyxHubs account
+            Sign in to your ICSW account
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex flex-col items-center justify-center py-8">
-          <Button 
-            variant="outline" 
-            className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors w-full max-w-xs"
-            onClick={handleDiscordSignIn}
-            disabled={loading}
+        <div className="flex flex-col items-center justify-center py-6">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                <DiscordIcon className="mr-2 h-4 w-4" />
-                Continue with Discord
-              </>
-            )}
-          </Button>
+            <Button 
+              className="bg-[#5865F2] hover:bg-[#4752C4] text-white w-full max-w-xs border-none"
+              onClick={handleDiscordSignIn}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <DiscordIcon className="mr-2 h-4 w-4" />
+                  Continue with Discord
+                </>
+              )}
+            </Button>
+          </motion.div>
         </div>
         
         <DialogFooter className="flex justify-center">
           <p className="text-sm text-gray-400">
-            By continuing, you agree to MoyxHubs' Terms of Service and Privacy Policy
+            By continuing, you agree to ICSW's Terms of Service
           </p>
         </DialogFooter>
       </DialogContent>

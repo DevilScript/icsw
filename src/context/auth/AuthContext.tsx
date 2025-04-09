@@ -18,6 +18,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { userProfile, setUserProfile, fetchUserProfile } = useProfileData();
   const { signInWithDiscord, signOut } = useAuthMethods(setLoading, setUserProfile);
 
+  // Add empty implementation functions to satisfy the type
+  const signUp = async () => ({ error: new Error("Not implemented"), data: null });
+  const signIn = async () => ({ error: new Error("Not implemented"), data: null });
+  const resetPassword = async () => ({ error: new Error("Not implemented"), data: null });
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -34,16 +39,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
           
           toast({
-            title: "Notification",
-            description: "Signed in",
+            title: "Welcome!",
+            description: "Signed in successfully",
+            className: "bg-gray-800 border border-pastelPink text-white",
           });
         }
         
         if (event === 'SIGNED_OUT') {
           setUserProfile(null);
           toast({
-            title: "Notification",
-            description: "Signed out",
+            title: "Goodbye!",
+            description: "Signed out successfully",
+            className: "bg-gray-800 border border-pastelPink text-white",
           });
         }
       }
@@ -64,13 +71,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, [toast]);
 
-  const value = {
+  const value: AuthContextType = {
     session,
     user,
     userProfile,
     signInWithDiscord,
     signOut,
     loading,
+    signUp,
+    signIn,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

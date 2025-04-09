@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
-  Code, 
   MessageCircle, 
   User, 
   Menu, 
@@ -20,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import LogoW from "@/components/icons/LogoW";
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -64,9 +64,9 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Code className="text-pastelPink h-6 w-6" />
+            <LogoW className="text-pastelPink h-6 w-6" />
             <Link to="/" className="font-bold text-xl text-white">
-              Moyx<span className="text-pastelPink">Hubs</span>
+              ICS<span className="text-pastelPink">W</span>
             </Link>
           </div>
           
