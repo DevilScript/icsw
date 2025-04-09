@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const contributors = [
-  { name: "Mo🍉", role: "Lead Developer", avatar: "https://i.ibb.co/b5gYWz4/IMG-9301.jpg", instagram: "https://www.instagram.com/mo.icsw/" },
+  { name: "Mo🍉", role: "Lead Developer", avatar: "https://i.ibb.co/wFD7JTdb/D3-D095-EF-D0-D5-47-A1-B382-BBA57-A1-DE014.jpg", instagram: "https://www.instagram.com/mo.icsw/" },
 ];
 
 const Hero = () => {
