@@ -30,6 +30,27 @@ export type Database = {
         }
         Relationships: []
       }
+      script_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_value: string
+          script_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_value: string
+          script_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_value?: string
+          script_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
