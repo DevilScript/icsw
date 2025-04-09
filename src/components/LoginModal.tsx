@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -8,10 +8,8 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Github, LogIn, Loader2, KeyRound, Instagram } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import DiscordIcon from '@/components/icons/DiscordIcon';
 import { useAuth } from '@/context/auth';
 import { useNavigate } from 'react-router-dom';
@@ -23,44 +21,9 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
-  const { signIn, signInWithDiscord, resetPassword, loading } = useAuth();
+  const { signInWithDiscord, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError(null);
-    
-    if (!email || !password) {
-      setAuthError('Please enter both email and password');
-      return;
-    }
-    
-    try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        setAuthError(error.message);
-        toast({
-          variant: "destructive",
-          title: "Sign in failed",
-          description: error.message,
-        });
-      } else {
-        onOpenChange(false);
-        navigate('/');
-      }
-    } catch (err: any) {
-      setAuthError(err.message);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
-    }
-  };
 
   const handleDiscordSignIn = async () => {
     try {
@@ -73,42 +36,6 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
         description: err.message,
       });
     }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setAuthError('Please enter your email address');
-      return;
-    }
-    
-    try {
-      const { error } = await resetPassword(email);
-      if (error) {
-        setAuthError(error.message);
-        toast({
-          variant: "destructive",
-          title: "Password reset failed",
-          description: error.message,
-        });
-      } else {
-        toast({
-          title: "Password reset email sent",
-          description: "Please check your email for instructions to reset your password.",
-        });
-      }
-    } catch (err: any) {
-      setAuthError(err.message);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
-    }
-  };
-
-  const navigateToSignUp = () => {
-    onOpenChange(false);
-    navigate('/auth?tab=signup');
   };
 
   return (
@@ -133,49 +60,11 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSignIn} className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="bg-gray-900/50 border-pastelPink/30 text-white focus:border-pastelPink/50"
-              disabled={loading}
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-gray-900/50 border-pastelPink/30 text-white focus:border-pastelPink/50"
-              disabled={loading}
-            />
-            <div className="flex justify-end">
-              <Button 
-                variant="link" 
-                type="button"
-                className="text-xs text-pastelPink hover:text-white transition-colors p-0 h-auto"
-                onClick={handleForgotPassword}
-              >
-                Forgot password?
-              </Button>
-            </div>
-          </div>
-          
-          {authError && (
-            <div className="text-red-400 text-sm">{authError}</div>
-          )}
-          
+        <div className="flex flex-col items-center justify-center py-8">
           <Button 
-            type="submit"
-            className="bg-gray-700/90 hover:bg-gray-600/90 text-white border border-pastelPink/30 w-full shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+            variant="outline" 
+            className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors w-full max-w-xs"
+            onClick={handleDiscordSignIn}
             disabled={loading}
           >
             {loading ? (
@@ -185,40 +74,17 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
               </>
             ) : (
               <>
-                <LogIn className="mr-2 h-4 w-4" />
-                Sign In
+                <DiscordIcon className="mr-2 h-4 w-4" />
+                Continue with Discord
               </>
             )}
           </Button>
-          
-          <div className="relative my-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-gray-800 px-2 text-gray-400">Or continue with</span>
-            </div>
-          </div>
-          
-          <Button 
-            variant="outline" 
-            className="border-pastelPink/30 text-white bg-gray-700/70 hover:bg-gray-600/70 transition-colors w-full"
-            onClick={handleDiscordSignIn}
-            disabled={loading}
-          >
-            <DiscordIcon className="mr-2 h-4 w-4" />
-            Discord
-          </Button>
-        </form>
+        </div>
         
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-end">
-          <Button 
-            variant="link" 
-            onClick={navigateToSignUp}
-            className="text-pastelPink hover:text-white transition-colors"
-          >
-            Create account
-          </Button>
+        <DialogFooter className="flex justify-center">
+          <p className="text-sm text-gray-400">
+            By continuing, you agree to MoyxHubs' Terms of Service and Privacy Policy
+          </p>
         </DialogFooter>
       </DialogContent>
     </Dialog>

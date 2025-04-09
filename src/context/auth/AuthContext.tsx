@@ -16,8 +16,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
   
   const { userProfile, setUserProfile, fetchUserProfile } = useProfileData();
-  const { signUp, signIn, signInWithDiscord, resetPassword, signOut } = 
-    useAuthMethods(setLoading, setUserProfile);
+  const { signInWithDiscord, signOut } = useAuthMethods(setLoading, setUserProfile);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -69,11 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     user,
     userProfile,
-    signUp,
-    signIn,
     signInWithDiscord,
     signOut,
-    resetPassword,
     loading,
   };
 
