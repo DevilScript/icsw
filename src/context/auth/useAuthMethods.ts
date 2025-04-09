@@ -16,7 +16,7 @@ export const useAuthMethods = (
         data: {
           nickname: nickname
         },
-        emailRedirectTo: 'http://localhost:3000/'
+        emailRedirectTo: 'https://icsw.lovable.app/'
       }
     });
     setLoading(false);
@@ -38,7 +38,7 @@ export const useAuthMethods = (
     await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: 'http://localhost:3000/'
+        redirectTo: 'https://icsw.lovable.app/'
       }
     });
     setLoading(false);
@@ -47,7 +47,7 @@ export const useAuthMethods = (
   const resetPassword = async (email: string) => {
     setLoading(true);
     const result = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:3000/auth/reset',
+      redirectTo: 'https://icsw.lovable.app/auth/reset',
     });
     setLoading(false);
     return result;
