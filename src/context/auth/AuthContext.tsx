@@ -24,7 +24,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     refreshUserData
   } = useProfileData();
   
-  const { signInWithDiscord, signOut } = useAuthMethods(setLoading);
+  const { signInWithDiscord, signOut } = useAuthMethods(setLoading, setUserProfile);
+
+  // Add empty implementation functions to satisfy the type
+  const signUp = async () => ({ error: new Error("Not implemented"), data: null });
+  const signIn = async () => ({ error: new Error("Not implemented"), data: null });
+  const resetPassword = async () => ({ error: new Error("Not implemented"), data: null });
 
   const refreshUserDataWrapper = async () => {
     if (user) {
@@ -89,6 +94,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signInWithDiscord,
     signOut,
     loading,
+    signUp,
+    signIn,
+    resetPassword,
     refreshUserData: refreshUserDataWrapper
   };
 

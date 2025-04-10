@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import DiscordIcon from '@/components/icons/DiscordIcon';
 import { useAuth } from '@/context/auth';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import LogoW from './icons/LogoW';
-import DiscordIcon from './icons/DiscordIcon';
 
 interface LoginModalProps {
   open: boolean;
@@ -24,15 +25,19 @@ interface LoginModalProps {
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   const { signInWithDiscord, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleDiscordSignIn = async () => {
-    await signInWithDiscord();
-    onOpenChange(false);
-  };
-
-  const navigateToAuthPage = () => {
-    onOpenChange(false);
-    navigate('/auth');
+    try {
+      await signInWithDiscord();
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Discord sign in failed",
+        description: err.message,
+      });
+    }
   };
 
   return (
@@ -74,24 +79,32 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex flex-col items-center justify-center py-6 space-y-4">
-          <Button 
-            onClick={handleDiscordSignIn}
-            className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium flex items-center justify-center"
-            disabled={loading}
+        <div className="flex flex-col items-center justify-center py-6">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Connecting...
-              </>
-            ) : (
-              <>
-                <DiscordIcon className="mr-2 h-5 w-5" />
-                Continue with Discord
-              </>
-            )}
-          </Button>
+            <Button 
+              className="bg-[#5865F2] hover:bg-[#4752C4] text-white w-full max-w-xs border-none"
+              onClick={handleDiscordSignIn}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <DiscordIcon className="mr-2 h-4 w-4" />
+                  Continue with Discord
+                </>
+              )}
+            </Button>
+          </motion.div>
         </div>
         
         <DialogFooter className="flex justify-center">

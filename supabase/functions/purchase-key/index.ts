@@ -31,7 +31,7 @@ serve(async (req) => {
       );
     }
 
-    // Get map details from map_definitions table
+    // Get map details
     const { data: mapData, error: mapError } = await supabase
       .from('map_definitions')
       .select('*')

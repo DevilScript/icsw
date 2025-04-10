@@ -47,8 +47,20 @@ export type AuthContextType = {
   userProfile: UserProfile | null;
   userBalance: UserBalance | null;
   userKeys: UserKey[] | null;
+  signUp: (email: string, password: string, nickname: string) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>;
+  signIn: (email: string, password: string) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>;
   signInWithDiscord: () => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{
+    error: Error | null;
+    data: any | null;
+  }>;
   loading: boolean;
   refreshUserData: () => Promise<void>;
 };
