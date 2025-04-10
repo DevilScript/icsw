@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
   MessageCircle, 
@@ -7,8 +7,12 @@ import {
   Menu, 
   X, 
   LogOut,
+  CreditCard,
+  ShoppingCart,
+  Clock,
+  RefreshCw,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from '@/context/auth';
 import {
   DropdownMenu,
@@ -19,7 +23,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import LogoW from "@/components/icons/LogoW";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -27,12 +41,116 @@ interface NavbarProps {
 
 const Navbar = ({ onLoginClick }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, userProfile, signOut } = useAuth();
+  const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
+  const [supportMessage, setSupportMessage] = useState('');
+  const [discordId, setDiscordId] = useState('');
+  const [sendingSupport, setSendingSupport] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const { user, userProfile, userBalance, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
+  // Track scroll position to change navbar background
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      if (offset > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleSupportSubmit = async () => {
+    if (!supportMessage.trim()) {
+      toast({
+        title: "Message required",
+        description: "Please enter a support message",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const userIdentifier = user ? (userProfile?.nickname || user.email) : discordId;
+    
+    if (!user && !discordId.trim()) {
+      toast({
+        title: "Discord ID required",
+        description: "Please enter your Discord ID",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSendingSupport(true);
+    try {
+      const response = await fetch("https://discordapp.com/api/webhooks/1359627280980377780/EJoE6FIUTwpmzI_MD9CFCdeA1ers_nKTfHcBw9NIuCn0r_-uY6Ifqbq0YX2RDkA0-id_", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          embeds: [{
+            title: "Support Request",
+            description: supportMessage,
+            color: 16738740, // Pastel pink
+            fields: [
+              {
+                name: "User",
+                value: userIdentifier,
+                inline: true
+              },
+              {
+                name: "Status",
+                value: user ? "Logged In" : "Not Logged In",
+                inline: true
+              },
+              {
+                name: "Page",
+                value: location.pathname,
+                inline: true
+              }
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Support request sent",
+          description: "We'll get back to you soon!",
+          className: "bg-gray-800 border-green-500 text-white",
+        });
+        setIsSupportDialogOpen(false);
+        setSupportMessage('');
+        setDiscordId('');
+      } else {
+        throw new Error("Failed to send support request");
+      }
+    } catch (error) {
+      console.error("Error sending support:", error);
+      toast({
+        title: "Failed to send",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingSupport(false);
+    }
   };
 
   // Get avatar from Discord if available
@@ -60,11 +178,12 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-lg border-b border-pastelPink/20">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-black/40 backdrop-blur-lg border-b border-pastelPink/20' : 'bg-transparent'
+    }`}>
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <LogoW className="text-pastelPink h-6 w-6" />
             <Link to="/" className="font-bold text-xl text-white">
               ICS<span className="text-pastelPink">W</span>
             </Link>
@@ -75,17 +194,26 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             <a href="#scripts" className="text-white hover:text-pastelPink transition-colors">
               Scripts
             </a>
-            <a href="#features" className="text-white hover:text-pastelPink transition-colors">
-              Features
+            <Link to="/store" className="text-white hover:text-pastelPink transition-colors">
+              Store
+            </Link>
+            <Link to="/topup" className="text-white hover:text-pastelPink transition-colors">
+              Topup
+            </Link>
+            <a href="#support" className="text-white hover:text-pastelPink transition-colors">
+              Support
             </a>
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <a href="https://discord.gg/3CFe4KBks2" target="_blank" rel="noopener noreferrer">
-              <Button variant="ghost" size="icon" className="text-white hover:text-pastelPink hover:bg-black/30">
-                <MessageCircle className="h-5 w-5" />
-              </Button>
-            </a>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:text-pastelPink hover:bg-black/30"
+              onClick={() => setIsSupportDialogOpen(true)}
+            >
+              <MessageCircle className="h-5 w-5" />
+            </Button>
             
             {user ? (
               <DropdownMenu>
@@ -104,11 +232,43 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       <User className="mr-2 h-4 w-4" />
                     )}
                     {getDisplayName()}
+                    {userBalance && (
+                      <span className="ml-2 text-pastelPink font-semibold">
+                        {userBalance.balance.toFixed(2)} THB
+                      </span>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 text-white">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-gray-700" />
+                  
+                  <DropdownMenuItem 
+                    className="hover:bg-gray-700 cursor-pointer"
+                    onClick={() => navigate('/topup')}
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Topup
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem 
+                    className="hover:bg-gray-700 cursor-pointer"
+                    onClick={() => navigate('/history')}
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    History
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem 
+                    className="hover:bg-gray-700 cursor-pointer"
+                    onClick={() => navigate('/reset-hwid')}
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Reset HWID
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator className="bg-gray-700" />
+                  
                   <DropdownMenuItem 
                     className="hover:bg-gray-700 cursor-pointer"
                     onClick={handleSignOut}
@@ -152,35 +312,74 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             >
               Scripts
             </a>
-            <a 
-              href="#features" 
+            <Link 
+              to="/store" 
               className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              Features
+              Store
+            </Link>
+            <Link 
+              to="/topup" 
+              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Topup
+            </Link>
+            <a 
+              href="#support" 
+              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Support
             </a>
             
-            <div className="flex items-center gap-2 pt-2">
-              <a 
-                href="https://discord.gg/3CFe4KBks2" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-pastelPink px-3 py-2 rounded-md flex items-center"
+            <div className="pt-2 space-y-2">
+              <button 
+                className="text-white hover:text-pastelPink px-3 py-2 rounded-md flex items-center w-full"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsSupportDialogOpen(true);
+                }}
               >
-                <MessageCircle className="h-5 w-5 mr-2" /> Discord
-              </a>
+                <MessageCircle className="h-5 w-5 mr-2" /> Contact Support
+              </button>
               
               {user ? (
-                <Button 
-                  className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.15)]"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    handleSignOut();
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
+                <>
+                  {userBalance && (
+                    <div className="px-3 py-2 text-pastelPink font-semibold">
+                      Balance: {userBalance.balance.toFixed(2)} THB
+                    </div>
+                  )}
+                  
+                  <Link 
+                    to="/history" 
+                    className="text-white hover:text-pastelPink px-3 py-2 rounded-md flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Clock className="h-5 w-5 mr-2" /> History
+                  </Link>
+                  
+                  <Link 
+                    to="/reset-hwid" 
+                    className="text-white hover:text-pastelPink px-3 py-2 rounded-md flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <RefreshCw className="h-5 w-5 mr-2" /> Reset HWID
+                  </Link>
+                  
+                  <Button 
+                    className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.15)]"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleSignOut();
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <Button 
                   className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.15)]"
@@ -197,6 +396,61 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           </div>
         </div>
       )}
+
+      {/* Support Dialog */}
+      <Dialog open={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen}>
+        <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 text-white">
+          <DialogHeader>
+            <DialogTitle>Contact Support</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Send us a message and we'll get back to you as soon as possible.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!user && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">
+                Discord ID
+              </label>
+              <Input 
+                value={discordId}
+                onChange={e => setDiscordId(e.target.value)}
+                placeholder="Your Discord username"
+                className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
+              />
+            </div>
+          )}
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">
+              Message
+            </label>
+            <Textarea 
+              value={supportMessage}
+              onChange={e => setSupportMessage(e.target.value)}
+              placeholder="Describe your issue in detail..."
+              className="min-h-[100px] bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSupportDialogOpen(false)}
+              className="border-pastelPink/30 text-white"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSupportSubmit}
+              disabled={sendingSupport}
+              className="bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
+            >
+              {sendingSupport ? 'Sending...' : 'Send Message'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 };

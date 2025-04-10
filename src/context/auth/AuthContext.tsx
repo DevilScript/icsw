@@ -15,13 +15,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
   
-  const { userProfile, setUserProfile, fetchUserProfile } = useProfileData();
+  const { 
+    userProfile, 
+    setUserProfile, 
+    userBalance, 
+    userKeys, 
+    fetchUserProfile, 
+    refreshUserData
+  } = useProfileData();
+  
   const { signInWithDiscord, signOut } = useAuthMethods(setLoading, setUserProfile);
 
   // Add empty implementation functions to satisfy the type
   const signUp = async () => ({ error: new Error("Not implemented"), data: null });
   const signIn = async () => ({ error: new Error("Not implemented"), data: null });
   const resetPassword = async () => ({ error: new Error("Not implemented"), data: null });
+
+  const refreshUserDataWrapper = async () => {
+    if (user) {
+      await refreshUserData(user.id);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -75,12 +89,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     user,
     userProfile,
+    userBalance,
+    userKeys,
     signInWithDiscord,
     signOut,
     loading,
     signUp,
     signIn,
     resetPassword,
+    refreshUserData: refreshUserDataWrapper
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

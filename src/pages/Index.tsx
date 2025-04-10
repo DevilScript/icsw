@@ -1,18 +1,16 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
-import Features from '@/components/Features';
 import ScriptSection from '@/components/ScriptSection';
+import SupportSection from '@/components/SupportSection';
 import Footer from '@/components/Footer';
-import LoginModal from '@/components/LoginModal';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useAuth } from '@/context/auth';
-import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -46,9 +44,6 @@ const Index = () => {
         <div className="absolute top-1/2 left-1/3 w-72 h-72 bg-gray-600/5 rounded-full filter blur-[80px]"></div>
       </div>
       
-      {/* Login modal */}
-      <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
-      
       {/* Login button (fixed position) */}
       <div className="fixed bottom-6 right-6 z-40 md:hidden">
         <Button 
@@ -64,7 +59,7 @@ const Index = () => {
         <Navbar onLoginClick={handleLoginClick} />
         <Hero />
         <ScriptSection />
-        <Features />
+        <SupportSection />
         <Footer />
       </div>
     </div>

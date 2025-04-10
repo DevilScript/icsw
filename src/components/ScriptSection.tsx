@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase, getScriptKeys } from "@/integrations/supabase/client";
+import { getScriptKeys } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/auth';
 
 const sampleScripts = [
@@ -57,14 +57,21 @@ const ScriptSection = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const scriptRef = useRef<HTMLDivElement>(null);
   const keyInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, userKeys } = useAuth();
+
+  useEffect(() => {
+    // If user is logged in and has keys, pre-fill the key field
+    if (user && userKeys && userKeys.length > 0 && userKeys[0].key_value) {
+      setScriptKey(userKeys[0].key_value);
+    }
+  }, [user, userKeys]);
 
   const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     
     toast({
-      title: "copied!",
+      title: "Copied!",
       description: "The script has been copied to your clipboard.",
       className: "bg-gray-800 border border-pastelPink text-white",
     });
@@ -92,6 +99,30 @@ const ScriptSection = () => {
 
   const verifyScriptKey = async () => {
     if (!scriptKey.trim() || !selectedScript || !user) return;
+    
+    // If user is logged in and has keys, check if the key matches one of their keys
+    if (user && userKeys && userKeys.length > 0) {
+      const userKey = userKeys[0].key_value;
+      
+      if (scriptKey.trim() === userKey) {
+        setIsKeyVerified(true);
+        setIsExpanded(true);
+        
+        toast({
+          title: "Key verified!",
+          description: "You now have access to the script.",
+          className: "bg-gray-800 border-green-500 text-white",
+        });
+        
+        // Scroll to script if needed
+        if (scriptRef.current) {
+          setTimeout(() => {
+            scriptRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+        return;
+      }
+    }
     
     setIsVerifying(true);
     
@@ -332,7 +363,7 @@ const ScriptSection = () => {
                 </div>
                 
                 <motion.pre 
-                  className="font-mono text-pastelPink/90 bg-black/80 p-6 overflow-x-auto max-h-[400px] overflow-y-auto text-sm"
+                  className="font-mono text-white/90 bg-black/80 p-6 overflow-x-auto max-h-[400px] overflow-y-auto text-sm"
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,

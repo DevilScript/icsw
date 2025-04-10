@@ -48,6 +48,33 @@ export type Database = {
         }
         Relationships: []
       }
+      map_definitions: {
+        Row: {
+          allowed_place_ids: string[]
+          features: string[] | null
+          id: string
+          name: string
+          price: number
+          status: string
+        }
+        Insert: {
+          allowed_place_ids: string[]
+          features?: string[] | null
+          id?: string
+          name: string
+          price: number
+          status?: string
+        }
+        Update: {
+          allowed_place_ids?: string[]
+          features?: string[] | null
+          id?: string
+          name?: string
+          price?: number
+          status?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -90,12 +117,91 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          transaction_type: string
+          user_id: string
+          voucher_code: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_type: string
+          user_id: string
+          voucher_code?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_type?: string
+          user_id?: string
+          voucher_code?: string | null
+        }
+        Relationships: []
+      }
+      user_balances: {
+        Row: {
+          balance: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_keys: {
+        Row: {
+          id: string
+          key_value: string
+          maps: string[] | null
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          key_value: string
+          maps?: string[] | null
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          key_value?: string
+          maps?: string[] | null
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      redeem_truemoney_voucher: {
+        Args: { voucher_code: string; user_id: string }
+        Returns: Json
+      }
+      reset_key_hwid: {
+        Args: { key_to_reset: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

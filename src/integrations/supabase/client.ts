@@ -36,3 +36,106 @@ export const getKeysTable = () => {
   // Using type assertion to bypass TypeScript's strict checking
   return supabase.from('keys' as any);
 };
+
+// Functions for user balances
+export const getUserBalance = (userId: string) => {
+  return supabase.from('user_balances').select('*').eq('id', userId).single();
+};
+
+export const createUserBalance = (userId: string) => {
+  return supabase.from('user_balances').insert({ id: userId, balance: 0 });
+};
+
+export const updateUserBalance = (userId: string, balance: number) => {
+  return supabase.from('user_balances').update({ balance, updated_at: new Date().toISOString() }).eq('id', userId);
+};
+
+// Functions for transactions
+export const addTransaction = (data: {
+  user_id: string;
+  amount: number;
+  transaction_type: 'topup' | 'purchase';
+  description?: string;
+  voucher_code?: string;
+}) => {
+  return supabase.from('transactions').insert(data);
+};
+
+export const getUserTransactions = (userId: string) => {
+  return supabase.from('transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+};
+
+// Functions for user keys
+export const getUserKeys = (userId: string) => {
+  return supabase.from('user_keys').select('*').eq('user_id', userId);
+};
+
+export const addUserKey = (data: {
+  user_id: string;
+  key_value: string;
+  maps: string[];
+}) => {
+  return supabase.from('user_keys').insert(data);
+};
+
+export const updateUserKey = (userId: string, key: string, maps: string[]) => {
+  return supabase.from('user_keys').update({ maps }).eq('user_id', userId).eq('key_value', key);
+};
+
+// Functions for available keys
+export const getAvailableKey = () => {
+  return getKeysTable()
+    .select()
+    .eq('status', 'Pending')
+    .is('hwid', null)
+    .or('maps.len().eq.0,maps.eq.{}');
+};
+
+export const updateKeyWithMap = (key: string, mapName: string, placeIds: string[]) => {
+  return getKeysTable()
+    .update({
+      maps: [mapName],
+      allowed_place_ids: placeIds
+    })
+    .eq('key', key);
+};
+
+export const updateKeyMaps = (key: string, maps: string[], placeIds: string[]) => {
+  return getKeysTable()
+    .update({
+      maps: maps,
+      allowed_place_ids: placeIds
+    })
+    .eq('key', key);
+};
+
+export const countAvailableKeys = () => {
+  return getKeysTable()
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'Pending')
+    .is('hwid', null)
+    .or('maps.len().eq.0,maps.eq.{}');
+};
+
+// Functions for map definitions
+export const getMapDefinitions = () => {
+  return supabase.from('map_definitions').select('*');
+};
+
+export const getMapById = (id: string) => {
+  return supabase.from('map_definitions').select('*').eq('id', id).single();
+};
+
+export const getMapByName = (name: string) => {
+  return supabase.from('map_definitions').select('*').eq('name', name).single();
+};
+
+// Function to reset key HWID
+export const resetKeyHWID = (key: string) => {
+  return supabase.rpc('reset_key_hwid', { key_to_reset: key });
+};
+
+// Function to redeem TrueMoney voucher
+export const redeemTrueMoneyVoucher = (voucher_code: string, user_id: string) => {
+  return supabase.rpc('redeem_truemoney_voucher', { voucher_code, user_id });
+};
