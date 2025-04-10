@@ -19,7 +19,6 @@ const HistoryPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!user && !loading) {
       toast({
@@ -31,7 +30,6 @@ const HistoryPage = () => {
       return;
     }
     
-    // Fetch transactions
     const fetchTransactions = async () => {
       if (!user) return;
       
@@ -40,9 +38,8 @@ const HistoryPage = () => {
         if (error) throw error;
         
         if (data && Array.isArray(data)) {
-          // First filter out null or invalid items
-          const validTransactionData = data.filter(tx => 
-            tx && 
+          const validTransactionData = data.filter((tx): tx is NonNullable<typeof tx> => 
+            tx !== null && 
             typeof tx === 'object' &&
             'id' in tx && 
             'user_id' in tx && 
@@ -51,30 +48,15 @@ const HistoryPage = () => {
             'created_at' in tx
           );
           
-          // Now map the valid items to Transaction type
           const validTransactions: Transaction[] = validTransactionData.map(tx => {
-            // Type assertion is safe here because we filtered above
-            if (!tx) {
-              // This should never happen due to the filter, but TypeScript needs this check
-              return {
-                id: '',
-                user_id: '',
-                amount: 0,
-                transaction_type: '',
-                description: '',
-                created_at: ''
-              };
-            }
-            
-            const rawTx = tx as any;
             return {
-              id: String(rawTx.id),
-              user_id: String(rawTx.user_id),
-              amount: Number(rawTx.amount),
-              transaction_type: String(rawTx.transaction_type),
-              description: rawTx.description ? String(rawTx.description) : '',
-              voucher_code: rawTx.voucher_code ? String(rawTx.voucher_code) : undefined,
-              created_at: String(rawTx.created_at)
+              id: String(tx.id),
+              user_id: String(tx.user_id),
+              amount: Number(tx.amount),
+              transaction_type: String(tx.transaction_type),
+              description: tx.description ? String(tx.description) : '',
+              voucher_code: tx.voucher_code ? String(tx.voucher_code) : undefined,
+              created_at: String(tx.created_at)
             };
           });
           
@@ -115,7 +97,6 @@ const HistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-deepBlack via-darkGray/70 to-deepBlack text-white">
-      {/* Custom cursor */}
       <style>
         {`
         body {
@@ -127,7 +108,6 @@ const HistoryPage = () => {
         `}
       </style>
       
-      {/* Background elements */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute top-1/3 left-0 w-96 h-96 bg-pastelPink/5 rounded-full filter blur-[120px]"></div>
         <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-gray-500/5 rounded-full filter blur-[100px]"></div>

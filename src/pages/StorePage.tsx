@@ -58,8 +58,8 @@ const StorePage = () => {
         if (mapError) throw mapError;
         
         if (mapData && Array.isArray(mapData)) {
-          const validMapData = mapData.filter(map => 
-            map && 
+          const validMapData = mapData.filter((map): map is NonNullable<typeof map> => 
+            map !== null && 
             typeof map === 'object' &&
             'id' in map && 
             'name' in map && 
@@ -68,22 +68,16 @@ const StorePage = () => {
             'allowed_place_ids' in map
           );
           
-          const validMaps: MapDefinition[] = [];
-          
-          for (const mapItem of validMapData) {
-            if (!mapItem) continue;
-            
-            const map = mapItem as any;
-            
-            validMaps.push({
+          const validMaps: MapDefinition[] = validMapData.map(map => {
+            return {
               id: String(map.id),
               name: String(map.name),
               price: Number(map.price),
               status: String(map.status),
               features: Array.isArray(map.features) ? map.features : [],
               allowed_place_ids: Array.isArray(map.allowed_place_ids) ? map.allowed_place_ids : []
-            });
-          }
+            };
+          });
           
           setMaps(validMaps);
         }
