@@ -76,15 +76,19 @@ export const useProfileData = () => {
           await createUserBalance(userId);
           // Try fetching again
           const { data: newBalanceData } = await getUserBalance(userId);
+          
+          // Safe type checking with non-null assertion after check
           if (newBalanceData && typeof newBalanceData === 'object') {
-            if ('id' in newBalanceData && 
-                'balance' in newBalanceData &&
-                'updated_at' in newBalanceData) {
+            const rawNewData = newBalanceData as any;
+            
+            if ('id' in rawNewData && 
+                'balance' in rawNewData &&
+                'updated_at' in rawNewData) {
               
               const validBalance: UserBalance = {
-                id: String(newBalanceData.id),
-                balance: Number(newBalanceData.balance),
-                updated_at: String(newBalanceData.updated_at)
+                id: String(rawNewData.id),
+                balance: Number(rawNewData.balance),
+                updated_at: String(rawNewData.updated_at)
               };
               setUserBalance(validBalance);
             }
@@ -93,14 +97,17 @@ export const useProfileData = () => {
           console.error('Error fetching user balance:', balanceError);
         }
       } else if (balanceData && typeof balanceData === 'object') {
-        if ('id' in balanceData && 
-            'balance' in balanceData &&
-            'updated_at' in balanceData) {
+        // Safe type checking with non-null assertion after check
+        const rawData = balanceData as any;
+        
+        if ('id' in rawData && 
+            'balance' in rawData &&
+            'updated_at' in rawData) {
           
           const validBalance: UserBalance = {
-            id: String(balanceData.id),
-            balance: Number(balanceData.balance),
-            updated_at: String(balanceData.updated_at)
+            id: String(rawData.id),
+            balance: Number(rawData.balance),
+            updated_at: String(rawData.updated_at)
           };
           setUserBalance(validBalance);
         }
@@ -123,13 +130,17 @@ export const useProfileData = () => {
             'purchased_at' in key &&
             'maps' in key
           )
-          .map(key => ({
-            id: String(key.id),
-            user_id: String(key.user_id),
-            key_value: String(key.key_value),
-            purchased_at: String(key.purchased_at),
-            maps: Array.isArray(key.maps) ? key.maps : []
-          }));
+          .map(key => {
+            // Safe type assertion with non-null check
+            const rawKey = key as any;
+            return {
+              id: String(rawKey.id),
+              user_id: String(rawKey.user_id),
+              key_value: String(rawKey.key_value),
+              purchased_at: String(rawKey.purchased_at),
+              maps: Array.isArray(rawKey.maps) ? rawKey.maps : []
+            };
+          });
         
         setUserKeys(validKeys);
       }

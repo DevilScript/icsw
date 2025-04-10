@@ -52,15 +52,19 @@ const HistoryPage = () => {
               'transaction_type' in tx &&
               'created_at' in tx
             )
-            .map(tx => ({
-              id: String(tx.id),
-              user_id: String(tx.user_id),
-              amount: Number(tx.amount),
-              transaction_type: String(tx.transaction_type),
-              description: tx.description ? String(tx.description) : '',
-              voucher_code: tx.voucher_code ? String(tx.voucher_code) : undefined,
-              created_at: String(tx.created_at)
-            }));
+            .map(tx => {
+              // Using non-null assertion after check with type casting for safety
+              const rawTx = tx as any;
+              return {
+                id: String(rawTx.id),
+                user_id: String(rawTx.user_id),
+                amount: Number(rawTx.amount),
+                transaction_type: String(rawTx.transaction_type),
+                description: rawTx.description ? String(rawTx.description) : '',
+                voucher_code: rawTx.voucher_code ? String(rawTx.voucher_code) : undefined,
+                created_at: String(rawTx.created_at)
+              };
+            });
           
           setTransactions(validTransactions);
         }

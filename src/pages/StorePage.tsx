@@ -73,14 +73,18 @@ const StorePage = () => {
               'status' in map &&
               'allowed_place_ids' in map
             )
-            .map(map => ({
-              id: String(map.id),
-              name: String(map.name),
-              price: Number(map.price),
-              status: String(map.status),
-              features: Array.isArray(map.features) ? map.features : [],
-              allowed_place_ids: Array.isArray(map.allowed_place_ids) ? map.allowed_place_ids : []
-            }));
+            .map(map => {
+              // Using non-null assertion after check with type casting for safety
+              const rawMap = map as any;
+              return {
+                id: String(rawMap.id),
+                name: String(rawMap.name),
+                price: Number(rawMap.price),
+                status: String(rawMap.status),
+                features: Array.isArray(rawMap.features) ? rawMap.features : [],
+                allowed_place_ids: Array.isArray(rawMap.allowed_place_ids) ? rawMap.allowed_place_ids : []
+              };
+            });
           
           setMaps(validMaps);
         }
