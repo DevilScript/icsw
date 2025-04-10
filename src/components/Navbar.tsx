@@ -77,8 +77,8 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const handleSupportSubmit = async () => {
     if (!supportMessage.trim()) {
       toast({
-        title: "Message required",
-        description: "Please enter a support message",
+        title: "Message Required",
+        description: "Please enter a message",
         variant: "destructive"
       });
       return;
@@ -415,7 +415,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               <Input 
                 value={discordId}
                 onChange={e => setDiscordId(e.target.value)}
-                placeholder="Your Discord username"
+                placeholder="Moyx#5001"
                 className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
               />
             </div>
@@ -428,7 +428,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             <Textarea 
               value={supportMessage}
               onChange={e => setSupportMessage(e.target.value)}
-              placeholder="Describe your issue in detail..."
+              placeholder="Here"
               className="min-h-[100px] bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
             />
           </div>

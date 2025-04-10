@@ -43,7 +43,7 @@ const Community = () => {
               <Github className="h-8 w-8 text-pastelPink" />
             </div>
             <h3 className="text-xl font-semibold mb-2 text-white">GitHub</h3>
-            <p className="text-gray-400 mb-4">Contribute to the project and report issues</p>
+            <p className="text-gray-400 mb-4">Report issues</p>
             <Button variant="outline" className="w-full border-pastelPink/60 text-pastelPink hover:bg-pastelPink/10 rounded-md">
               View Repo
             </Button>
