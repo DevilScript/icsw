@@ -120,30 +120,26 @@ export const useProfileData = () => {
         console.error('Error fetching user keys:', keysError);
       } else if (keysData && Array.isArray(keysData)) {
         // Make sure we only set valid key data
-        const validKeys: UserKey[] = keysData
-          .filter(key => 
-            key && 
-            typeof key === 'object' &&
-            'id' in key &&
-            'user_id' in key &&
-            'key_value' in key &&
-            'purchased_at' in key &&
-            'maps' in key
-          )
-          .map(key => {
-            // Safe type assertion after check and null check
-            if (!key) return null; // This should never happen due to the filter above, but TS needs it
-            
-            const rawKey = key as any;
-            return {
-              id: String(rawKey.id),
-              user_id: String(rawKey.user_id),
-              key_value: String(rawKey.key_value),
-              purchased_at: String(rawKey.purchased_at),
-              maps: Array.isArray(rawKey.maps) ? rawKey.maps : []
-            };
-          })
-          .filter((key): key is UserKey => key !== null); // Filter out any null values that might have been introduced
+        const validKeysData = keysData.filter(key => 
+          key && 
+          typeof key === 'object' &&
+          'id' in key &&
+          'user_id' in key &&
+          'key_value' in key &&
+          'purchased_at' in key &&
+          'maps' in key
+        );
+        
+        const validKeys: UserKey[] = validKeysData.map(key => {
+          const rawKey = key as any;  // Type assertion is safe here because we filtered above
+          return {
+            id: String(rawKey.id),
+            user_id: String(rawKey.user_id),
+            key_value: String(rawKey.key_value),
+            purchased_at: String(rawKey.purchased_at),
+            maps: Array.isArray(rawKey.maps) ? rawKey.maps : []
+          };
+        });
         
         setUserKeys(validKeys);
       }

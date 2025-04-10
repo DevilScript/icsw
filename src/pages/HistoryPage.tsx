@@ -41,34 +41,30 @@ const HistoryPage = () => {
         if (error) throw error;
         
         if (data && Array.isArray(data)) {
-          // Ensure each transaction has the required fields and transform to Transaction type
-          const validTransactions: Transaction[] = data
-            .filter(tx => 
-              tx && 
-              typeof tx === 'object' &&
-              'id' in tx && 
-              'user_id' in tx && 
-              'amount' in tx && 
-              'transaction_type' in tx &&
-              'created_at' in tx
-            )
-            .map(tx => {
-              // Using non-null assertion after check with type casting for safety
-              // Since tx is already filtered for null above, we know it's not null here
-              if (!tx) return null; // TypeScript safety - should never happen due to filter above
-              
-              const rawTx = tx as any;
-              return {
-                id: String(rawTx.id),
-                user_id: String(rawTx.user_id),
-                amount: Number(rawTx.amount),
-                transaction_type: String(rawTx.transaction_type),
-                description: rawTx.description ? String(rawTx.description) : '',
-                voucher_code: rawTx.voucher_code ? String(rawTx.voucher_code) : undefined,
-                created_at: String(rawTx.created_at)
-              };
-            })
-            .filter((tx): tx is Transaction => tx !== null); // Remove any potential nulls
+          // First filter out null or invalid items
+          const validTransactionData = data.filter(tx => 
+            tx && 
+            typeof tx === 'object' &&
+            'id' in tx && 
+            'user_id' in tx && 
+            'amount' in tx && 
+            'transaction_type' in tx &&
+            'created_at' in tx
+          );
+          
+          // Now map the valid items to Transaction type
+          const validTransactions: Transaction[] = validTransactionData.map(tx => {
+            const rawTx = tx as any;  // Type assertion is safe here because we filtered above
+            return {
+              id: String(rawTx.id),
+              user_id: String(rawTx.user_id),
+              amount: Number(rawTx.amount),
+              transaction_type: String(rawTx.transaction_type),
+              description: rawTx.description ? String(rawTx.description) : '',
+              voucher_code: rawTx.voucher_code ? String(rawTx.voucher_code) : undefined,
+              created_at: String(rawTx.created_at)
+            };
+          });
           
           setTransactions(validTransactions);
         }

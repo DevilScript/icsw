@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,6 @@ const StorePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!user && !loading) {
       toast({
@@ -52,47 +50,39 @@ const StorePage = () => {
     }
   }, [user, loading, navigate]);
 
-  // Load map definitions and available key count
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get map definitions
         const { data: mapData, error: mapError } = await getMapDefinitions();
         
         if (mapError) throw mapError;
         
         if (mapData && Array.isArray(mapData)) {
-          // Transform the data to ensure it conforms to MapDefinition type
-          const validMaps: MapDefinition[] = mapData
-            .filter(map => 
-              map && 
-              typeof map === 'object' &&
-              'id' in map && 
-              'name' in map && 
-              'price' in map && 
-              'status' in map &&
-              'allowed_place_ids' in map
-            )
-            .map(map => {
-              // Using non-null assertion after check with type casting for safety
-              if (!map) return null; // TypeScript safety - should never happen due to filter above
-              
-              const rawMap = map as any;
-              return {
-                id: String(rawMap.id),
-                name: String(rawMap.name),
-                price: Number(rawMap.price),
-                status: String(rawMap.status),
-                features: Array.isArray(rawMap.features) ? rawMap.features : [],
-                allowed_place_ids: Array.isArray(rawMap.allowed_place_ids) ? rawMap.allowed_place_ids : []
-              };
-            })
-            .filter((map): map is MapDefinition => map !== null); // Remove any potential nulls
+          const validMapData = mapData.filter(map => 
+            map && 
+            typeof map === 'object' &&
+            'id' in map && 
+            'name' in map && 
+            'price' in map && 
+            'status' in map &&
+            'allowed_place_ids' in map
+          );
+          
+          const validMaps: MapDefinition[] = validMapData.map(map => {
+            const rawMap = map as any;
+            return {
+              id: String(rawMap.id),
+              name: String(rawMap.name),
+              price: Number(rawMap.price),
+              status: String(rawMap.status),
+              features: Array.isArray(rawMap.features) ? rawMap.features : [],
+              allowed_place_ids: Array.isArray(rawMap.allowed_place_ids) ? rawMap.allowed_place_ids : []
+            };
+          });
           
           setMaps(validMaps);
         }
         
-        // Count available keys
         const { count, error: countError } = await countAvailableKeys();
         if (countError) throw countError;
         if (count !== null) setAvailableKeys(count);
@@ -135,7 +125,6 @@ const StorePage = () => {
       return;
     }
     
-    // Check if user already owns this map
     if (userKeys && userKeys.length > 0) {
       const hasMap = userKeys.some(key => 
         key.maps && key.maps.includes(getMapNameById(selectedMap))
@@ -151,7 +140,6 @@ const StorePage = () => {
       }
     }
     
-    // Check available keys
     if (availableKeys <= 0) {
       toast({
         title: "Out of stock",
@@ -161,12 +149,10 @@ const StorePage = () => {
       return;
     }
     
-    // Check if user has enough balance
-    const map = maps.find(m => m.id === selectedMap);
-    if (map && userBalance && userBalance.balance < map.price) {
+    if (maps.find(m => m.id === selectedMap) && userBalance && userBalance.balance < maps.find(m => m.id === selectedMap).price) {
       toast({
         title: "Insufficient balance",
-        description: `You need ${map.price} THB to purchase this map`,
+        description: `You need ${maps.find(m => m.id === selectedMap).price} THB to purchase this map`,
         variant: "destructive"
       });
       return;
@@ -195,10 +181,8 @@ const StorePage = () => {
           className: "bg-gray-800 border-green-500 text-white",
         });
         
-        // Update available keys count
         setAvailableKeys(prevCount => Math.max(0, prevCount - 1));
         
-        // Refresh user data
         await refreshUserData();
       } else {
         toast({
@@ -248,7 +232,6 @@ const StorePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-deepBlack via-darkGray/70 to-deepBlack text-white">
-      {/* Custom cursor */}
       <style>
         {`
         body {
@@ -260,7 +243,6 @@ const StorePage = () => {
         `}
       </style>
       
-      {/* Background elements */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute top-1/3 left-0 w-96 h-96 bg-pastelPink/5 rounded-full filter blur-[120px]"></div>
         <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-gray-500/5 rounded-full filter blur-[100px]"></div>
@@ -375,7 +357,6 @@ const StorePage = () => {
         <Footer />
       </div>
       
-      {/* Purchase confirmation dialog */}
       <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <AlertDialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 text-white">
           <AlertDialogHeader>
