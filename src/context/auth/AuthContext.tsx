@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     refreshUserData
   } = useProfileData();
   
-  const { signUp, signIn, resetPassword, signOut } = useAuthMethods(setLoading, setUserProfile);
+  const { signInWithDiscord, signOut } = useAuthMethods(setLoading);
 
   const refreshUserDataWrapper = async () => {
     if (user) {
@@ -86,9 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     userProfile,
     userBalance,
     userKeys,
-    signUp,
-    signIn,
-    resetPassword,
+    signInWithDiscord,
     signOut,
     loading,
     refreshUserData: refreshUserDataWrapper

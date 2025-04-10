@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -21,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import DiscordIcon from './icons/DiscordIcon';
+import NavbarLinks from './NavbarLinks';
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -68,6 +70,23 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     };
   }, []);
 
+  // Check for scroll to section from location state
+  useEffect(() => {
+    if (location.state && location.state.scrollTo) {
+      const sectionId = location.state.scrollTo;
+      const element = document.getElementById(sectionId);
+      
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+      
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -83,7 +102,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       return;
     }
 
-    const userIdentifier = user ? (userProfile?.nickname || user.email) : discordId;
+    const userIdentifier = user ? (userProfile?.nickname || user.user_metadata.full_name || user.email) : discordId;
     
     if (!user && !discordId.trim()) {
       toast({
@@ -159,7 +178,12 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       return userProfile.nickname;
     }
     
-    // Then fallback to email
+    // Then try to get from Discord metadata
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    
+    // Then fallback to email or generic name
     return user?.email?.split('@')[0] || 'Account';
   };
 
@@ -177,18 +201,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center justify-center space-x-8 flex-1">
-            <a href="#scripts" className="text-white hover:text-pastelPink transition-colors">
-              Scripts
-            </a>
-            <Link to="/store" className="text-white hover:text-pastelPink transition-colors">
-              Store
-            </Link>
-            <Link to="/topup" className="text-white hover:text-pastelPink transition-colors">
-              Topup
-            </Link>
-            <a href="#support" className="text-white hover:text-pastelPink transition-colors">
-              Support
-            </a>
+            <NavbarLinks />
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -258,9 +271,9 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             ) : (
               <Button 
                 className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md shadow-[0_0_10px_rgba(255,179,209,0.15)]"
-                onClick={() => navigate('/auth')}
+                onClick={onLoginClick}
               >
-                <User className="mr-2 h-4 w-4" />
+                <DiscordIcon className="mr-2 h-4 w-4" />
                 Login
               </Button>
             )}
@@ -282,34 +295,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       {isMenuOpen && (
         <div className="md:hidden bg-black/90 backdrop-blur-lg border-b border-pastelPink/20 py-4 px-4 animate-fade-in">
           <div className="flex flex-col space-y-4">
-            <a 
-              href="#scripts" 
-              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Scripts
-            </a>
-            <Link 
-              to="/store" 
-              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Store
-            </Link>
-            <Link 
-              to="/topup" 
-              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Topup
-            </Link>
-            <a 
-              href="#support" 
-              className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Support
-            </a>
+            <NavbarLinks onClose={() => setIsMenuOpen(false)} isMobile={true} />
             
             <div className="pt-2 space-y-2">
               <button 
@@ -362,10 +348,10 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md w-full mt-2 shadow-[0_0_10px_rgba(255,179,209,0.15)]"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    navigate('/auth');
+                    onLoginClick();
                   }}
                 >
-                  <User className="mr-2 h-4 w-4" />
+                  <DiscordIcon className="mr-2 h-4 w-4" />
                   Login
                 </Button>
               )}

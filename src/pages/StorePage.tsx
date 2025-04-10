@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getMapDefinitions, countAvailableKeys, supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { ShoppingCart, Package, Check, X } from 'lucide-react';
 import { MapDefinition } from '@/context/auth/types';
 
@@ -53,32 +54,36 @@ const StorePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data: mapData, error: mapError } = await getMapDefinitions();
+        // Fetch map definitions from Supabase
+        const { data: mapData, error: mapError } = await supabase
+          .from('map_definitions')
+          .select('*');
         
         if (mapError) throw mapError;
         
-        if (mapData && Array.isArray(mapData)) {
-          const filteredData = mapData.filter(item => 
-            item !== null && 
-            typeof item === 'object'
-          );
-          
-          const validMaps: MapDefinition[] = filteredData.map(item => {
-            const map = item as any;
-            return {
-              id: String(map.id || ''),
-              name: String(map.name || ''),
-              price: Number(map.price || 0),
-              status: String(map.status || ''),
+        if (mapData) {
+          const validMaps: MapDefinition[] = mapData
+            .filter(item => item !== null)
+            .map(map => ({
+              id: map.id,
+              name: map.name,
+              price: Number(map.price),
+              status: map.status,
               features: Array.isArray(map.features) ? map.features : [],
               allowed_place_ids: Array.isArray(map.allowed_place_ids) ? map.allowed_place_ids : []
-            };
-          });
+            }));
           
           setMaps(validMaps);
         }
         
-        const { count, error: countError } = await countAvailableKeys();
+        // Count available keys
+        const { count, error: countError } = await supabase
+          .from('keys')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Pending')
+          .is('hwid', null)
+          .or('maps.len().eq.0,maps.eq.{}');
+        
         if (countError) throw countError;
         if (count !== null) setAvailableKeys(count);
       } catch (error) {
@@ -121,8 +126,11 @@ const StorePage = () => {
     }
     
     if (userKeys && userKeys.length > 0) {
+      const selectedMapObj = maps.find(m => m.id === selectedMap);
+      if (!selectedMapObj) return;
+      
       const hasMap = userKeys.some(key => 
-        key.maps && key.maps.includes(getMapNameById(selectedMap))
+        key.maps && key.maps.includes(selectedMapObj.name)
       );
       
       if (hasMap) {
@@ -144,10 +152,11 @@ const StorePage = () => {
       return;
     }
     
-    if (maps.find(m => m.id === selectedMap) && userBalance && userBalance.balance < maps.find(m => m.id === selectedMap)!.price) {
+    const selectedMapObj = maps.find(m => m.id === selectedMap);
+    if (selectedMapObj && userBalance && userBalance.balance < selectedMapObj.price) {
       toast({
         title: "Insufficient balance",
-        description: `You need ${maps.find(m => m.id === selectedMap)!.price} THB to purchase this map`,
+        description: `You need ${selectedMapObj.price} THB to purchase this map`,
         variant: "destructive"
       });
       return;
@@ -161,10 +170,16 @@ const StorePage = () => {
     
     setPurchasing(true);
     try {
-      const selectedMapName = getMapNameById(selectedMap);
+      const selectedMapObj = maps.find(m => m.id === selectedMap);
+      if (!selectedMapObj) {
+        throw new Error("Selected map not found");
+      }
       
       const { data, error } = await supabase.functions.invoke('purchase-key', {
-        body: { user_id: user.id, map_name: selectedMapName }
+        body: { 
+          user_id: user.id, 
+          map_name: selectedMapObj.name 
+        }
       });
       
       if (error) throw error;
@@ -172,7 +187,7 @@ const StorePage = () => {
       if (data.success) {
         toast({
           title: "Purchase successful!",
-          description: `You now own the ${selectedMapName} map`,
+          description: `You now own the ${selectedMapObj.name} map`,
           className: "bg-gray-800 border-green-500 text-white",
         });
         
@@ -186,7 +201,7 @@ const StorePage = () => {
           variant: "destructive"
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during purchase:', error);
       toast({
         title: "Purchase failed",
@@ -197,11 +212,6 @@ const StorePage = () => {
       setPurchasing(false);
       setConfirmDialogOpen(false);
     }
-  };
-
-  const getMapNameById = (id: string): string => {
-    const map = maps.find(m => m.id === id);
-    return map ? map.name : '';
   };
 
   const getStatusColor = (status: string) => {

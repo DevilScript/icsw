@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -9,16 +9,12 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Mail, Lock, User } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from '@/context/auth';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import LogoW from './icons/LogoW';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DiscordIcon from './icons/DiscordIcon';
 
 interface LoginModalProps {
   open: boolean;
@@ -26,73 +22,12 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
-  const { signIn, signUp, loading } = useAuth();
+  const { signInWithDiscord, loading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('signin');
-
-  const handleSignIn = async () => {
-    if (!email || !password) {
-      setAuthError('Please fill in all fields');
-      return;
-    }
-    
-    setAuthError(null);
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        setAuthError(error.message);
-      } else {
-        onOpenChange(false);
-      }
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Sign in failed",
-        description: err.message,
-      });
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (!email || !password || !confirmPassword || !nickname) {
-      setAuthError('Please fill in all fields');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setAuthError('Passwords do not match');
-      return;
-    }
-    
-    setAuthError(null);
-    try {
-      const { error } = await signUp(email, password, nickname);
-      
-      if (error) {
-        setAuthError(error.message);
-      } else {
-        toast({
-          title: "Account created",
-          description: "Please check your email to verify your account",
-          className: "bg-gray-800 border border-pastelPink text-white",
-        });
-        setActiveTab('signin');
-      }
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Sign up failed",
-        description: err.message,
-      });
-    }
+  const handleDiscordSignIn = async () => {
+    await signInWithDiscord();
+    onOpenChange(false);
   };
 
   const navigateToAuthPage = () => {
@@ -139,172 +74,24 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex flex-col items-center justify-center py-4 space-y-4">
-          {authError && (
-            <Alert variant="destructive" className="bg-red-900/40 border-red-500 text-white">
-              <AlertDescription>{authError}</AlertDescription>
-            </Alert>
-          )}
-          
-          <Tabs 
-            defaultValue="signin" 
-            value={activeTab} 
-            onValueChange={setActiveTab}
-            className="w-full"
+        <div className="flex flex-col items-center justify-center py-6 space-y-4">
+          <Button 
+            onClick={handleDiscordSignIn}
+            className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium flex items-center justify-center"
+            disabled={loading}
           >
-            <TabsList className="grid w-full grid-cols-2 bg-gray-900/50">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-pastelPink/20">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-pastelPink/20">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin" className="mt-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="modal-email" className="text-white">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="modal-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="modal-password" className="text-white">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="modal-password"
-                    type="password"
-                    placeholder="••••••••"
-                    className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <Button 
-                type="button"
-                className="w-full bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
-                onClick={handleSignIn}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
-              </Button>
-              
-              <div className="flex justify-center">
-                <Button 
-                  type="button" 
-                  variant="link" 
-                  className="text-pastelPink/80 hover:text-pastelPink"
-                  onClick={navigateToAuthPage}
-                >
-                  Need more options?
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="signup" className="mt-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="modal-signup-email" className="text-white">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="modal-signup-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="modal-nickname" className="text-white">Nickname</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="modal-nickname"
-                    type="text"
-                    placeholder="Your nickname"
-                    className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="modal-signup-password" className="text-white">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="modal-signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="modal-confirm-password" className="text-white">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="modal-confirm-password"
-                    type="password"
-                    placeholder="••••••••"
-                    className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <Button 
-                type="button"
-                className="w-full bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
-                onClick={handleSignUp}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  'Create Account'
-                )}
-              </Button>
-              
-              <div className="flex justify-center">
-                <Button 
-                  type="button" 
-                  variant="link" 
-                  className="text-pastelPink/80 hover:text-pastelPink"
-                  onClick={navigateToAuthPage}
-                >
-                  Need more options?
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              <>
+                <DiscordIcon className="mr-2 h-5 w-5" />
+                Continue with Discord
+              </>
+            )}
+          </Button>
         </div>
         
         <DialogFooter className="flex justify-center">

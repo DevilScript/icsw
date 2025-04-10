@@ -4,62 +4,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from './types';
 
 export const useAuthMethods = (
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  const signUp = async (email: string, password: string, nickname: string) => {
+  const signInWithDiscord = async () => {
     setLoading(true);
     
     try {
-      const result = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
         options: {
-          data: {
-            nickname
-          }
+          redirectTo: window.location.origin
         }
       });
       
-      return result;
+      if (error) {
+        console.error('Error during Discord sign in:', error);
+      }
     } catch (error) {
-      console.error('Error during sign up:', error);
-      return { error, data: null };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    setLoading(true);
-    
-    try {
-      const result = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      return result;
-    } catch (error) {
-      console.error('Error during sign in:', error);
-      return { error, data: null };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetPassword = async (email: string) => {
-    setLoading(true);
-    
-    try {
-      const result = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth-reset`
-      });
-      
-      return result;
-    } catch (error) {
-      console.error('Error during password reset:', error);
-      return { error, data: null };
+      console.error('Error during Discord sign in:', error);
     } finally {
       setLoading(false);
     }
@@ -72,9 +34,7 @@ export const useAuthMethods = (
   };
 
   return {
-    signUp,
-    signIn,
-    resetPassword,
+    signInWithDiscord,
     signOut
   };
 };
