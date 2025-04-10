@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -153,14 +152,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     }
   };
 
-  // Get avatar from Discord if available
-  const getAvatarUrl = () => {
-    if (user?.app_metadata?.provider === 'discord' && user?.user_metadata?.avatar_url) {
-      return user.user_metadata.avatar_url;
-    }
-    return null;
-  };
-
   // Get display name
   const getDisplayName = () => {
     // First try to get from our profile table
@@ -168,12 +159,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       return userProfile.nickname;
     }
     
-    // Then try Discord display name
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name;
-    }
-    
-    // Finally fallback to email
+    // Then fallback to email
     return user?.email?.split('@')[0] || 'Account';
   };
 
@@ -221,16 +207,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   <Button 
                     className="bg-gray-800/70 hover:bg-gray-700/80 text-white border border-pastelPink/30 rounded-md shadow-[0_0_10px_rgba(255,179,209,0.15)]"
                   >
-                    {getAvatarUrl() ? (
-                      <Avatar className="h-5 w-5 mr-2">
-                        <AvatarImage src={getAvatarUrl() || ""} />
-                        <AvatarFallback className="bg-gray-700 text-pastelPink text-xs">
-                          {getDisplayName().substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <User className="mr-2 h-4 w-4" />
-                    )}
+                    <User className="mr-2 h-4 w-4" />
                     {getDisplayName()}
                     {userBalance && (
                       <span className="ml-2 text-pastelPink font-semibold">

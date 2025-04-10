@@ -55,12 +55,11 @@ export type AuthContextType = {
     error: Error | null;
     data: any | null;
   }>;
-  signInWithDiscord: () => Promise<void>;
-  signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{
     error: Error | null;
     data: any | null;
   }>;
+  signOut: () => Promise<void>;
   loading: boolean;
   refreshUserData: () => Promise<void>;
 };

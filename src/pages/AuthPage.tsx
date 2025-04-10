@@ -1,19 +1,30 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, X } from 'lucide-react';
-import DiscordIcon from '@/components/icons/DiscordIcon';
+import { Loader2, X, Mail, Key, Lock, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LogoW from '@/components/icons/LogoW';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AuthPage = () => {
-  const { signInWithDiscord, user, loading } = useAuth();
+  const { signUp, signIn, resetPassword, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('signin');
+  const [forgotPassword, setForgotPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -21,13 +32,86 @@ const AuthPage = () => {
     }
   }, [user, navigate]);
 
-  const handleDiscordSignIn = async () => {
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      setAuthError('Please fill in all fields');
+      return;
+    }
+    
+    setAuthError(null);
     try {
-      await signInWithDiscord();
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        setAuthError(error.message);
+      }
     } catch (err: any) {
       toast({
         variant: "destructive",
-        title: "Discord sign in failed",
+        title: "Sign in failed",
+        description: err.message,
+      });
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!email || !password || !confirmPassword || !nickname) {
+      setAuthError('Please fill in all fields');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setAuthError('Passwords do not match');
+      return;
+    }
+    
+    setAuthError(null);
+    try {
+      const { error } = await signUp(email, password, nickname);
+      
+      if (error) {
+        setAuthError(error.message);
+      } else {
+        toast({
+          title: "Account created",
+          description: "Please check your email to verify your account",
+          className: "bg-gray-800 border border-pastelPink text-white",
+        });
+        setActiveTab('signin');
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign up failed",
+        description: err.message,
+      });
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email) {
+      setAuthError('Please enter your email');
+      return;
+    }
+    
+    setAuthError(null);
+    try {
+      const { error } = await resetPassword(email);
+      
+      if (error) {
+        setAuthError(error.message);
+      } else {
+        toast({
+          title: "Password reset email sent",
+          description: "Please check your email to reset your password",
+          className: "bg-gray-800 border border-pastelPink text-white",
+        });
+        setForgotPassword(false);
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Password reset failed",
         description: err.message,
       });
     }
@@ -108,58 +192,230 @@ const AuthPage = () => {
                 Welcome to <span className="text-white">ICS</span><span className="text-pastelPink">W</span>
               </CardTitle>
               <CardDescription className="text-center text-gray-400">
-                Connect with your Discord account
+                {forgotPassword 
+                  ? "Reset your password" 
+                  : activeTab === 'signin' 
+                    ? "Sign in to your account" 
+                    : "Create a new account"}
               </CardDescription>
             </CardHeader>
             
-            <CardContent className="flex flex-col items-center justify-center py-6 space-y-6">
-              <motion.div 
-                className="flex flex-col w-full gap-6"
-                variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button 
-                  type="button"
-                  className="w-full bg-[#5865F2] hover:bg-[#4752C4] transition-colors py-6 text-white border-none"
-                  onClick={handleDiscordSignIn}
-                  disabled={loading}
+            <CardContent className="flex flex-col items-center justify-center py-4 space-y-4">
+              {authError && (
+                <Alert variant="destructive" className="bg-red-900/40 border-red-500 text-white">
+                  <AlertDescription>{authError}</AlertDescription>
+                </Alert>
+              )}
+              
+              {forgotPassword ? (
+                <motion.div 
+                  className="w-full space-y-4"
+                  variants={itemVariants}
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <DiscordIcon className="mr-2 h-5 w-5" />
-                      Continue with Discord
-                    </>
-                  )}
-                </Button>
-              </motion.div>
-              
-              <motion.div 
-                className="w-full max-w-xs mx-auto"
-                variants={itemVariants}
-              >
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-700/50"></div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email" className="text-white">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input 
+                        id="reset-email"
+                        type="email"
+                        placeholder="your@email.com"
+                        className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs">
-                    <span className="bg-gray-800/70 px-2 text-gray-400">Secure Connection</span>
+                  
+                  <div className="flex flex-col gap-2">
+                    <Button 
+                      type="button"
+                      className="w-full bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
+                      onClick={handlePasswordReset}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Reset Link'
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      className="text-gray-400 hover:text-white"
+                      onClick={() => {
+                        setForgotPassword(false);
+                        setAuthError(null);
+                      }}
+                    >
+                      Back to Sign In
+                    </Button>
                   </div>
-                </div>
-              </motion.div>
-              
-              <motion.p 
-                className="text-sm text-gray-400 text-center"
-                variants={itemVariants}
-              >
-                By continuing, you agree to ICSW's Terms of Service
-              </motion.p>
+                </motion.div>
+              ) : (
+                <Tabs 
+                  defaultValue="signin" 
+                  value={activeTab} 
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2 bg-gray-900/50">
+                    <TabsTrigger value="signin" className="data-[state=active]:bg-pastelPink/20">Sign In</TabsTrigger>
+                    <TabsTrigger value="signup" className="data-[state=active]:bg-pastelPink/20">Sign Up</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="signin" className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-white">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input 
+                          id="email"
+                          type="email"
+                          placeholder="your@email.com"
+                          className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label htmlFor="password" className="text-white">Password</Label>
+                        <Button 
+                          type="button" 
+                          variant="link" 
+                          className="text-pastelPink/80 hover:text-pastelPink p-0 h-auto text-xs"
+                          onClick={() => {
+                            setForgotPassword(true);
+                            setAuthError(null);
+                          }}
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input 
+                          id="password"
+                          type="password"
+                          placeholder="••••••••"
+                          className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      type="button"
+                      className="w-full bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
+                      onClick={handleSignIn}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        'Sign In'
+                      )}
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="signup" className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="text-white">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input 
+                          id="signup-email"
+                          type="email"
+                          placeholder="your@email.com"
+                          className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="nickname" className="text-white">Nickname</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input 
+                          id="nickname"
+                          type="text"
+                          placeholder="Your nickname"
+                          className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password" className="text-white">Password</Label>
+                      <div className="relative">
+                        <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input 
+                          id="signup-password"
+                          type="password"
+                          placeholder="••••••••"
+                          className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password" className="text-white">Confirm Password</Label>
+                      <div className="relative">
+                        <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input 
+                          id="confirm-password"
+                          type="password"
+                          placeholder="••••••••"
+                          className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink pl-10"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      type="button"
+                      className="w-full bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
+                      onClick={handleSignUp}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating account...
+                        </>
+                      ) : (
+                        'Create Account'
+                      )}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+              )}
             </CardContent>
+            
+            <CardFooter className="flex justify-center pt-2 pb-6">
+              <p className="text-sm text-gray-400 text-center">
+                By continuing, you agree to ICSW's Terms of Service
+              </p>
+            </CardFooter>
           </Card>
         </motion.div>
       </motion.div>
