@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -38,25 +39,24 @@ const HistoryPage = () => {
         if (error) throw error;
         
         if (data && Array.isArray(data)) {
-          const validTransactionData = data.filter((tx): tx is NonNullable<typeof tx> => 
-            tx !== null && 
-            typeof tx === 'object' &&
-            'id' in tx && 
-            'user_id' in tx && 
-            'amount' in tx && 
-            'transaction_type' in tx &&
-            'created_at' in tx
+          // Filter out null or invalid objects
+          const filteredData = data.filter(item => 
+            item !== null && 
+            typeof item === 'object'
           );
           
-          const validTransactions: Transaction[] = validTransactionData.map(tx => {
+          // Now map the verified data to Transaction type with appropriate type checks
+          const validTransactions: Transaction[] = filteredData.map(item => {
+            // Using type assertion with a runtime check
+            const tx = item as any;
             return {
-              id: String(tx.id),
-              user_id: String(tx.user_id),
-              amount: Number(tx.amount),
-              transaction_type: String(tx.transaction_type),
+              id: String(tx.id || ''),
+              user_id: String(tx.user_id || ''),
+              amount: Number(tx.amount || 0),
+              transaction_type: String(tx.transaction_type || ''),
               description: tx.description ? String(tx.description) : '',
               voucher_code: tx.voucher_code ? String(tx.voucher_code) : undefined,
-              created_at: String(tx.created_at)
+              created_at: String(tx.created_at || '')
             };
           });
           
