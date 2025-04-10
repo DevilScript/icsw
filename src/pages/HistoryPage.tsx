@@ -54,6 +54,9 @@ const HistoryPage = () => {
             )
             .map(tx => {
               // Using non-null assertion after check with type casting for safety
+              // Since tx is already filtered for null above, we know it's not null here
+              if (!tx) return null; // TypeScript safety - should never happen due to filter above
+              
               const rawTx = tx as any;
               return {
                 id: String(rawTx.id),
@@ -64,7 +67,8 @@ const HistoryPage = () => {
                 voucher_code: rawTx.voucher_code ? String(rawTx.voucher_code) : undefined,
                 created_at: String(rawTx.created_at)
               };
-            });
+            })
+            .filter((tx): tx is Transaction => tx !== null); // Remove any potential nulls
           
           setTransactions(validTransactions);
         }
@@ -169,7 +173,7 @@ const HistoryPage = () => {
                           </span>
                         </div>
                         <p className="text-sm text-gray-400 mt-1">
-                          {formatDate(transaction.created_at)}
+                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
                       <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-400' : 'text-pastelPink'}`}>

@@ -131,7 +131,9 @@ export const useProfileData = () => {
             'maps' in key
           )
           .map(key => {
-            // Safe type assertion with non-null check
+            // Safe type assertion after check and null check
+            if (!key) return null; // This should never happen due to the filter above, but TS needs it
+            
             const rawKey = key as any;
             return {
               id: String(rawKey.id),
@@ -140,7 +142,8 @@ export const useProfileData = () => {
               purchased_at: String(rawKey.purchased_at),
               maps: Array.isArray(rawKey.maps) ? rawKey.maps : []
             };
-          });
+          })
+          .filter((key): key is UserKey => key !== null); // Filter out any null values that might have been introduced
         
         setUserKeys(validKeys);
       }

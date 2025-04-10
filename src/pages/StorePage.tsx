@@ -75,6 +75,8 @@ const StorePage = () => {
             )
             .map(map => {
               // Using non-null assertion after check with type casting for safety
+              if (!map) return null; // TypeScript safety - should never happen due to filter above
+              
               const rawMap = map as any;
               return {
                 id: String(rawMap.id),
@@ -84,7 +86,8 @@ const StorePage = () => {
                 features: Array.isArray(rawMap.features) ? rawMap.features : [],
                 allowed_place_ids: Array.isArray(rawMap.allowed_place_ids) ? rawMap.allowed_place_ids : []
               };
-            });
+            })
+            .filter((map): map is MapDefinition => map !== null); // Remove any potential nulls
           
           setMaps(validMaps);
         }
