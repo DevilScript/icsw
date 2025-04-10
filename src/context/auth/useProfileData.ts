@@ -119,27 +119,32 @@ export const useProfileData = () => {
       if (keysError) {
         console.error('Error fetching user keys:', keysError);
       } else if (keysData && Array.isArray(keysData)) {
-        // Make sure we only set valid key data
-        const validKeysData = keysData.filter(key => 
-          key && 
-          typeof key === 'object' &&
-          'id' in key &&
-          'user_id' in key &&
-          'key_value' in key &&
-          'purchased_at' in key &&
-          'maps' in key
-        );
+        // Make sure we only set valid key data by filtering first
+        const validKeys: UserKey[] = [];
         
-        const validKeys: UserKey[] = validKeysData.map(key => {
-          const rawKey = key as any;  // Type assertion is safe here because we filtered above
-          return {
-            id: String(rawKey.id),
-            user_id: String(rawKey.user_id),
-            key_value: String(rawKey.key_value),
-            purchased_at: String(rawKey.purchased_at),
-            maps: Array.isArray(rawKey.maps) ? rawKey.maps : []
-          };
-        });
+        // For each item in keysData, check if it's valid and add it to validKeys
+        for (const keyItem of keysData) {
+          if (keyItem && typeof keyItem === 'object') {
+            const key = keyItem as any;
+            
+            // Check if the key has all required properties
+            if (key && 
+                'id' in key && 
+                'user_id' in key && 
+                'key_value' in key && 
+                'purchased_at' in key && 
+                'maps' in key) {
+              
+              validKeys.push({
+                id: String(key.id),
+                user_id: String(key.user_id),
+                key_value: String(key.key_value),
+                purchased_at: String(key.purchased_at),
+                maps: Array.isArray(key.maps) ? key.maps : []
+              });
+            }
+          }
+        }
         
         setUserKeys(validKeys);
       }

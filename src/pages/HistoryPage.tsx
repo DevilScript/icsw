@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,20 @@ const HistoryPage = () => {
           
           // Now map the valid items to Transaction type
           const validTransactions: Transaction[] = validTransactionData.map(tx => {
-            const rawTx = tx as any;  // Type assertion is safe here because we filtered above
+            // Type assertion is safe here because we filtered above
+            if (!tx) {
+              // This should never happen due to the filter, but TypeScript needs this check
+              return {
+                id: '',
+                user_id: '',
+                amount: 0,
+                transaction_type: '',
+                description: '',
+                created_at: ''
+              };
+            }
+            
+            const rawTx = tx as any;
             return {
               id: String(rawTx.id),
               user_id: String(rawTx.user_id),
