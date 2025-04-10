@@ -165,7 +165,7 @@ const HistoryPage = () => {
                           </span>
                         </div>
                         <p className="text-sm text-gray-400 mt-1">
-                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
+                          {formatDate(transaction.created_at)}
                         </p>
                       </div>
                       <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-400' : 'text-pastelPink'}`}>

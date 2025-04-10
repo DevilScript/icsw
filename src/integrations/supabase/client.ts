@@ -117,7 +117,7 @@ export const getAvailableKey = () => {
     .or('maps.len().eq.0,maps.eq.{}');
 };
 
-export const updateKeyWithMap = (key: string, mapName: string, placeIds: string[]) => {
+export const updateKeyWithMap = (key: string, mapName: string, placeIds: any[]) => {
   return getKeysTable()
     .update({
       maps: [mapName],
@@ -126,7 +126,7 @@ export const updateKeyWithMap = (key: string, mapName: string, placeIds: string[
     .eq('key', key);
 };
 
-export const updateKeyMaps = (key: string, maps: string[], placeIds: string[]) => {
+export const updateKeyMaps = (key: string, maps: string[], placeIds: any[]) => {
   return getKeysTable()
     .update({
       maps: maps,

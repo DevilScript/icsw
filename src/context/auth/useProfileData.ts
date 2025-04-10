@@ -7,6 +7,10 @@ import { UserProfile, UserBalance, UserKey } from './types';
 const isUserBalanceData = (data: any): data is UserBalance => {
   return (
     data && 
+    typeof data === 'object' &&
+    'id' in data && 
+    'balance' in data && 
+    'updated_at' in data &&
     typeof data.id === 'string' && 
     typeof data.balance === 'number' && 
     typeof data.updated_at === 'string'
@@ -17,6 +21,12 @@ const isUserBalanceData = (data: any): data is UserBalance => {
 const isUserKeyData = (data: any): data is UserKey => {
   return (
     data && 
+    typeof data === 'object' &&
+    'id' in data && 
+    'user_id' in data && 
+    'key_value' in data && 
+    'purchased_at' in data && 
+    'maps' in data &&
     typeof data.id === 'string' && 
     typeof data.user_id === 'string' && 
     typeof data.key_value === 'string' && 
@@ -66,11 +76,8 @@ export const useProfileData = () => {
           await createUserBalance(userId);
           // Try fetching again
           const { data: newBalanceData } = await getUserBalance(userId);
-          if (newBalanceData) {
-            // Use type guard to validate data
-            if (typeof newBalanceData === 'object' && 
-                newBalanceData !== null && 
-                'id' in newBalanceData && 
+          if (newBalanceData && typeof newBalanceData === 'object') {
+            if ('id' in newBalanceData && 
                 'balance' in newBalanceData &&
                 'updated_at' in newBalanceData) {
               
@@ -85,11 +92,8 @@ export const useProfileData = () => {
         } else {
           console.error('Error fetching user balance:', balanceError);
         }
-      } else if (balanceData) {
-        // Use type guard to validate data
-        if (typeof balanceData === 'object' && 
-            balanceData !== null && 
-            'id' in balanceData && 
+      } else if (balanceData && typeof balanceData === 'object') {
+        if ('id' in balanceData && 
             'balance' in balanceData &&
             'updated_at' in balanceData) {
           
@@ -123,8 +127,8 @@ export const useProfileData = () => {
             id: String(key.id),
             user_id: String(key.user_id),
             key_value: String(key.key_value),
-            maps: Array.isArray(key.maps) ? key.maps : [],
-            purchased_at: String(key.purchased_at)
+            purchased_at: String(key.purchased_at),
+            maps: Array.isArray(key.maps) ? key.maps : []
           }));
         
         setUserKeys(validKeys);
