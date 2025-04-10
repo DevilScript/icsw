@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -41,11 +40,27 @@ const HistoryPage = () => {
         if (error) throw error;
         
         if (data && Array.isArray(data)) {
-          // Ensure each transaction has the required fields
-          const validTransactions = data.filter(tx => 
-            tx && 'id' in tx && 'user_id' in tx && 'amount' in tx && 'transaction_type' in tx
-          );
-          setTransactions(validTransactions as Transaction[]);
+          // Ensure each transaction has the required fields and transform to Transaction type
+          const validTransactions: Transaction[] = data
+            .filter(tx => 
+              tx && 
+              typeof tx.id === 'string' && 
+              typeof tx.user_id === 'string' && 
+              typeof tx.amount === 'number' && 
+              typeof tx.transaction_type === 'string' &&
+              typeof tx.created_at === 'string'
+            )
+            .map(tx => ({
+              id: tx.id,
+              user_id: tx.user_id,
+              amount: tx.amount,
+              transaction_type: tx.transaction_type,
+              description: tx.description || '',
+              voucher_code: tx.voucher_code,
+              created_at: tx.created_at
+            }));
+          
+          setTransactions(validTransactions);
         }
       } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -148,7 +163,7 @@ const HistoryPage = () => {
                           </span>
                         </div>
                         <p className="text-sm text-gray-400 mt-1">
-                          {formatDate(transaction.created_at)}
+                          {format(new Date(transaction.created_at), 'MMM d, yyyy h:mm a')}
                         </p>
                       </div>
                       <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-400' : 'text-pastelPink'}`}>

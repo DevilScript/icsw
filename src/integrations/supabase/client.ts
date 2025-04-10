@@ -39,17 +39,21 @@ export const getKeysTable = () => {
 
 // Functions for user balances
 export const getUserBalance = (userId: string) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('user_balances' as any).select('*').eq('id', userId).single();
 };
 
 export const createUserBalance = (userId: string) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('user_balances' as any).insert([{ 
     id: userId, 
-    balance: 0 
-  }] as any);
+    balance: 0,
+    updated_at: new Date().toISOString()
+  }] as any[]);
 };
 
 export const updateUserBalance = (userId: string, balance: number) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('user_balances' as any).update({ 
     balance, 
     updated_at: new Date().toISOString() 
@@ -64,10 +68,12 @@ export const addTransaction = (data: {
   description?: string;
   voucher_code?: string;
 }) => {
-  return supabase.from('transactions' as any).insert([data] as any);
+  // Use 'as any' to bypass type checking since the table might not be in the schema
+  return supabase.from('transactions' as any).insert([data] as any[]);
 };
 
 export const getUserTransactions = (userId: string) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('transactions' as any)
     .select('*')
     .eq('user_id', userId)
@@ -76,6 +82,7 @@ export const getUserTransactions = (userId: string) => {
 
 // Functions for user keys
 export const getUserKeys = (userId: string) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('user_keys' as any)
     .select('*')
     .eq('user_id', userId);
@@ -86,10 +93,15 @@ export const addUserKey = (data: {
   key_value: string;
   maps: string[];
 }) => {
-  return supabase.from('user_keys' as any).insert([data] as any);
+  // Use 'as any' to bypass type checking since the table might not be in the schema
+  return supabase.from('user_keys' as any).insert([{
+    ...data,
+    purchased_at: new Date().toISOString()
+  }] as any[]);
 };
 
 export const updateUserKey = (userId: string, key: string, maps: string[]) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('user_keys' as any)
     .update({ maps } as any)
     .eq('user_id', userId)
@@ -133,14 +145,17 @@ export const countAvailableKeys = () => {
 
 // Functions for map definitions
 export const getMapDefinitions = () => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('map_definitions' as any).select('*');
 };
 
 export const getMapById = (id: string) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('map_definitions' as any).select('*').eq('id', id).single();
 };
 
 export const getMapByName = (name: string) => {
+  // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('map_definitions' as any).select('*').eq('name', name).single();
 };
 

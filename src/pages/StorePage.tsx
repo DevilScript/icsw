@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -62,11 +61,26 @@ const StorePage = () => {
         if (mapError) throw mapError;
         
         if (mapData && Array.isArray(mapData)) {
-          // Make sure we only set valid map data
-          const validMaps = mapData.filter(map => 
-            map && 'id' in map && 'name' in map && 'price' in map && 'status' in map
-          );
-          setMaps(validMaps as MapDefinition[]);
+          // Transform the data to ensure it conforms to MapDefinition type
+          const validMaps: MapDefinition[] = mapData
+            .filter(map => 
+              map && 
+              typeof map.id === 'string' && 
+              typeof map.name === 'string' && 
+              typeof map.price === 'number' && 
+              typeof map.status === 'string' &&
+              Array.isArray(map.allowed_place_ids)
+            )
+            .map(map => ({
+              id: map.id,
+              name: map.name,
+              price: map.price,
+              status: map.status,
+              features: Array.isArray(map.features) ? map.features : [],
+              allowed_place_ids: map.allowed_place_ids
+            }));
+          
+          setMaps(validMaps);
         }
         
         // Count available keys

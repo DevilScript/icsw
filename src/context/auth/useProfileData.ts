@@ -25,7 +25,14 @@ export const useProfileData = () => {
           console.error('Error fetching user profile:', profileError);
         }
       } else if (profileData) {
-        setUserProfile(profileData as UserProfile);
+        // Only set the user profile if we have valid data
+        const validProfile: UserProfile = {
+          id: profileData.id,
+          nickname: profileData.nickname || '',
+          avatar_url: profileData.avatar_url || undefined,
+          created_at: profileData.created_at
+        };
+        setUserProfile(validProfile);
       }
 
       // Fetch user balance
@@ -38,18 +45,32 @@ export const useProfileData = () => {
           // Try fetching again
           const { data: newBalanceData } = await getUserBalance(userId);
           if (newBalanceData) {
-            // Ensure the data conforms to the UserBalance type
-            if ('id' in newBalanceData && 'balance' in newBalanceData) {
-              setUserBalance(newBalanceData as UserBalance);
+            // Validate the data matches our UserBalance type
+            if (typeof newBalanceData.id === 'string' && 
+                typeof newBalanceData.balance === 'number' &&
+                typeof newBalanceData.updated_at === 'string') {
+              const validBalance: UserBalance = {
+                id: newBalanceData.id,
+                balance: newBalanceData.balance,
+                updated_at: newBalanceData.updated_at
+              };
+              setUserBalance(validBalance);
             }
           }
         } else {
           console.error('Error fetching user balance:', balanceError);
         }
       } else if (balanceData) {
-        // Ensure the data conforms to the UserBalance type
-        if ('id' in balanceData && 'balance' in balanceData) {
-          setUserBalance(balanceData as UserBalance);
+        // Validate the data matches our UserBalance type
+        if (typeof balanceData.id === 'string' && 
+            typeof balanceData.balance === 'number' &&
+            typeof balanceData.updated_at === 'string') {
+          const validBalance: UserBalance = {
+            id: balanceData.id,
+            balance: balanceData.balance,
+            updated_at: balanceData.updated_at
+          };
+          setUserBalance(validBalance);
         }
       }
 
@@ -60,10 +81,24 @@ export const useProfileData = () => {
         console.error('Error fetching user keys:', keysError);
       } else if (keysData && Array.isArray(keysData)) {
         // Make sure we only set valid key data
-        const validKeys = keysData.filter(key => 
-          key && 'key_value' in key && 'user_id' in key
-        );
-        setUserKeys(validKeys as UserKey[]);
+        const validKeys: UserKey[] = keysData
+          .filter(key => 
+            key && 
+            typeof key.id === 'string' &&
+            typeof key.user_id === 'string' &&
+            typeof key.key_value === 'string' &&
+            typeof key.purchased_at === 'string' &&
+            Array.isArray(key.maps)
+          )
+          .map(key => ({
+            id: key.id,
+            user_id: key.user_id,
+            key_value: key.key_value,
+            maps: key.maps || [],
+            purchased_at: key.purchased_at
+          }));
+        
+        setUserKeys(validKeys);
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
