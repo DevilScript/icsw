@@ -43,7 +43,10 @@ export const getUserBalance = (userId: string) => {
 };
 
 export const createUserBalance = (userId: string) => {
-  return supabase.from('user_balances' as any).insert({ id: userId, balance: 0 } as any);
+  return supabase.from('user_balances' as any).insert([{ 
+    id: userId, 
+    balance: 0 
+  }] as any);
 };
 
 export const updateUserBalance = (userId: string, balance: number) => {
@@ -61,16 +64,21 @@ export const addTransaction = (data: {
   description?: string;
   voucher_code?: string;
 }) => {
-  return supabase.from('transactions' as any).insert(data as any);
+  return supabase.from('transactions' as any).insert([data] as any);
 };
 
 export const getUserTransactions = (userId: string) => {
-  return supabase.from('transactions' as any).select('*').eq('user_id', userId).order('created_at', { ascending: false });
+  return supabase.from('transactions' as any)
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
 };
 
 // Functions for user keys
 export const getUserKeys = (userId: string) => {
-  return supabase.from('user_keys' as any).select('*').eq('user_id', userId);
+  return supabase.from('user_keys' as any)
+    .select('*')
+    .eq('user_id', userId);
 };
 
 export const addUserKey = (data: {
@@ -78,11 +86,14 @@ export const addUserKey = (data: {
   key_value: string;
   maps: string[];
 }) => {
-  return supabase.from('user_keys' as any).insert(data as any);
+  return supabase.from('user_keys' as any).insert([data] as any);
 };
 
 export const updateUserKey = (userId: string, key: string, maps: string[]) => {
-  return supabase.from('user_keys' as any).update({ maps } as any).eq('user_id', userId).eq('key_value', key);
+  return supabase.from('user_keys' as any)
+    .update({ maps } as any)
+    .eq('user_id', userId)
+    .eq('key_value', key);
 };
 
 // Functions for available keys

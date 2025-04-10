@@ -38,13 +38,19 @@ export const useProfileData = () => {
           // Try fetching again
           const { data: newBalanceData } = await getUserBalance(userId);
           if (newBalanceData) {
-            setUserBalance(newBalanceData as UserBalance);
+            // Ensure the data conforms to the UserBalance type
+            if ('id' in newBalanceData && 'balance' in newBalanceData) {
+              setUserBalance(newBalanceData as UserBalance);
+            }
           }
         } else {
           console.error('Error fetching user balance:', balanceError);
         }
       } else if (balanceData) {
-        setUserBalance(balanceData as UserBalance);
+        // Ensure the data conforms to the UserBalance type
+        if ('id' in balanceData && 'balance' in balanceData) {
+          setUserBalance(balanceData as UserBalance);
+        }
       }
 
       // Fetch user keys
@@ -52,8 +58,12 @@ export const useProfileData = () => {
       
       if (keysError) {
         console.error('Error fetching user keys:', keysError);
-      } else if (keysData) {
-        setUserKeys(keysData as UserKey[]);
+      } else if (keysData && Array.isArray(keysData)) {
+        // Make sure we only set valid key data
+        const validKeys = keysData.filter(key => 
+          key && 'key_value' in key && 'user_id' in key
+        );
+        setUserKeys(validKeys as UserKey[]);
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);

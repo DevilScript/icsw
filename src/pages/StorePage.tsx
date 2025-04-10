@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -57,8 +58,16 @@ const StorePage = () => {
       try {
         // Get map definitions
         const { data: mapData, error: mapError } = await getMapDefinitions();
+        
         if (mapError) throw mapError;
-        if (mapData) setMaps(mapData as MapDefinition[]);
+        
+        if (mapData && Array.isArray(mapData)) {
+          // Make sure we only set valid map data
+          const validMaps = mapData.filter(map => 
+            map && 'id' in map && 'name' in map && 'price' in map && 'status' in map
+          );
+          setMaps(validMaps as MapDefinition[]);
+        }
         
         // Count available keys
         const { count, error: countError } = await countAvailableKeys();

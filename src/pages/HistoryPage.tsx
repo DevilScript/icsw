@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,14 @@ const HistoryPage = () => {
       try {
         const { data, error } = await getUserTransactions(user.id);
         if (error) throw error;
-        if (data) setTransactions(data as Transaction[]);
+        
+        if (data && Array.isArray(data)) {
+          // Ensure each transaction has the required fields
+          const validTransactions = data.filter(tx => 
+            tx && 'id' in tx && 'user_id' in tx && 'amount' in tx && 'transaction_type' in tx
+          );
+          setTransactions(validTransactions as Transaction[]);
+        }
       } catch (error) {
         console.error('Error fetching transactions:', error);
         toast({
