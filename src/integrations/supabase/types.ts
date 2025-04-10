@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      keys: {
+        Row: {
+          allowed_place_ids: number[] | null
+          allowexec: string[] | null
+          created: string | null
+          days: number
+          exploit: string | null
+          hwid: string | null
+          id: number
+          key: string
+          maps: string[] | null
+          status: string
+        }
+        Insert: {
+          allowed_place_ids?: number[] | null
+          allowexec?: string[] | null
+          created?: string | null
+          days?: number
+          exploit?: string | null
+          hwid?: string | null
+          id?: number
+          key: string
+          maps?: string[] | null
+          status?: string
+        }
+        Update: {
+          allowed_place_ids?: number[] | null
+          allowexec?: string[] | null
+          created?: string | null
+          days?: number
+          exploit?: string | null
+          hwid?: string | null
+          id?: number
+          key?: string
+          maps?: string[] | null
+          status?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

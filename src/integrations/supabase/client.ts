@@ -30,7 +30,9 @@ export const getScriptKeys = () => {
   return supabase.from('script_keys');
 };
 
-// Function to safely query the keys table in the new database
+// Due to TypeScript limitations with the current Database type definition,
+// we need to use a type assertion for tables not in the types.ts file
 export const getKeysTable = () => {
-  return supabase.from('keys');
+  // Using type assertion to bypass TypeScript's strict checking
+  return supabase.from('keys' as any);
 };
