@@ -6,11 +6,11 @@ import type { Database } from './types';
 const _SUPABASE = {
   get URL() {
     // Using a default value for development purposes only
-    return 'https://iuxhbfecfllkrpuxucni.supabase.co';
+    return 'https://ifmrpxcnhebocyvcbcpn.supabase.co';
   },
   get KEY() {
     // Using a default value for development purposes only
-    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1eGhiZmVjZmxsa3JwdXh1Y25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5MTU0NDQsImV4cCI6MjA1ODQ5MTQ0NH0.x7lOtHcHZ5QuimSLNT2WyrSdLN6ebDTuCwLl5H01ftQ';
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbXJweGNuaGVib2N5dmNiY3BuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNTA3MDAsImV4cCI6MjA1OTYyNjcwMH0.0-31o_oJs04y9vpErCT1NT0LsibNA-PdfK8wrkCUNZE';
   }
 };
 
