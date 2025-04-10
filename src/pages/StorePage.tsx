@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -26,15 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { getMapDefinitions, countAvailableKeys, supabase } from '@/integrations/supabase/client';
 import { ShoppingCart, Package, Check, X } from 'lucide-react';
-
-type MapDefinition = {
-  id: string;
-  name: string;
-  price: number;
-  status: string;
-  features: string[];
-  allowed_place_ids: string[];
-};
+import { MapDefinition } from '@/context/auth/types';
 
 const StorePage = () => {
   const [maps, setMaps] = useState<MapDefinition[]>([]);
@@ -67,7 +58,7 @@ const StorePage = () => {
         // Get map definitions
         const { data: mapData, error: mapError } = await getMapDefinitions();
         if (mapError) throw mapError;
-        if (mapData) setMaps(mapData);
+        if (mapData) setMaps(mapData as MapDefinition[]);
         
         // Count available keys
         const { count, error: countError } = await countAvailableKeys();

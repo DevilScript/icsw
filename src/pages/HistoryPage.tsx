@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -10,15 +9,7 @@ import Footer from '@/components/Footer';
 import { getUserTransactions } from '@/integrations/supabase/client';
 import { History, Download, ArrowDown, ArrowUp } from 'lucide-react';
 import { format } from 'date-fns';
-
-type Transaction = {
-  id: string;
-  amount: number;
-  transaction_type: string;
-  description: string;
-  created_at: string;
-  voucher_code?: string;
-};
+import { Transaction } from '@/context/auth/types';
 
 const HistoryPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -47,7 +38,7 @@ const HistoryPage = () => {
       try {
         const { data, error } = await getUserTransactions(user.id);
         if (error) throw error;
-        if (data) setTransactions(data);
+        if (data) setTransactions(data as Transaction[]);
       } catch (error) {
         console.error('Error fetching transactions:', error);
         toast({

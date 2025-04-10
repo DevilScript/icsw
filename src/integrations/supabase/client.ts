@@ -39,15 +39,18 @@ export const getKeysTable = () => {
 
 // Functions for user balances
 export const getUserBalance = (userId: string) => {
-  return supabase.from('user_balances').select('*').eq('id', userId).single();
+  return supabase.from('user_balances' as any).select('*').eq('id', userId).single();
 };
 
 export const createUserBalance = (userId: string) => {
-  return supabase.from('user_balances').insert({ id: userId, balance: 0 });
+  return supabase.from('user_balances' as any).insert({ id: userId, balance: 0 } as any);
 };
 
 export const updateUserBalance = (userId: string, balance: number) => {
-  return supabase.from('user_balances').update({ balance, updated_at: new Date().toISOString() }).eq('id', userId);
+  return supabase.from('user_balances' as any).update({ 
+    balance, 
+    updated_at: new Date().toISOString() 
+  } as any).eq('id', userId);
 };
 
 // Functions for transactions
@@ -58,16 +61,16 @@ export const addTransaction = (data: {
   description?: string;
   voucher_code?: string;
 }) => {
-  return supabase.from('transactions').insert(data);
+  return supabase.from('transactions' as any).insert(data as any);
 };
 
 export const getUserTransactions = (userId: string) => {
-  return supabase.from('transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+  return supabase.from('transactions' as any).select('*').eq('user_id', userId).order('created_at', { ascending: false });
 };
 
 // Functions for user keys
 export const getUserKeys = (userId: string) => {
-  return supabase.from('user_keys').select('*').eq('user_id', userId);
+  return supabase.from('user_keys' as any).select('*').eq('user_id', userId);
 };
 
 export const addUserKey = (data: {
@@ -75,11 +78,11 @@ export const addUserKey = (data: {
   key_value: string;
   maps: string[];
 }) => {
-  return supabase.from('user_keys').insert(data);
+  return supabase.from('user_keys' as any).insert(data as any);
 };
 
 export const updateUserKey = (userId: string, key: string, maps: string[]) => {
-  return supabase.from('user_keys').update({ maps }).eq('user_id', userId).eq('key_value', key);
+  return supabase.from('user_keys' as any).update({ maps } as any).eq('user_id', userId).eq('key_value', key);
 };
 
 // Functions for available keys
@@ -119,15 +122,15 @@ export const countAvailableKeys = () => {
 
 // Functions for map definitions
 export const getMapDefinitions = () => {
-  return supabase.from('map_definitions').select('*');
+  return supabase.from('map_definitions' as any).select('*');
 };
 
 export const getMapById = (id: string) => {
-  return supabase.from('map_definitions').select('*').eq('id', id).single();
+  return supabase.from('map_definitions' as any).select('*').eq('id', id).single();
 };
 
 export const getMapByName = (name: string) => {
-  return supabase.from('map_definitions').select('*').eq('name', name).single();
+  return supabase.from('map_definitions' as any).select('*').eq('name', name).single();
 };
 
 // Function to reset key HWID
