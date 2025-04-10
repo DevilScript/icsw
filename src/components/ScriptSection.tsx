@@ -12,131 +12,38 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, getScriptKeys } from "@/integrations/supabase/client";
+import { useAuth } from '@/context/auth';
 
 const sampleScripts = [
   {
-    id: "basketball",
-    name: "BasketBall Legends",
-    code: `-- BasketBall Legends Script
--- This script enhances your basketball game experience
-local PlayerModule = require(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
-local Controls = PlayerModule:GetControls()
+    id: "loader",
+    name: "Loader",
+    code: `getgenv().key = 'YOUR_KEY_HERE'
+-----------------------------------------------------------------
+local p1, p2, p3 = "htt", "hub", "cod"   
+local p4, p5, p6 = "git", "ps:/", "src"    
+local q1, q2, q3 = "/raw.", "rep", "usr"    
+local q4, q5, q6 = "bit", "github", "com"  
+local r1, r2, r3 = "user", "ref", "moy"   
+local r4, r5, r6 = "raw", "content", "dat" 
+local s1, s2, s3 = "eon", ".com/moyx-", "fs/"
+local s4, s5, s6 = "labs/Basket", "bal", "LG/" 
+local t1, t2, t3 = "l-LG/re", "fs/hea", "ds/"   
+local t4, t5, t6 = "ma", "in/BLG", "ge/"   
+local u1, u2, u3 = "s/main/", "bit/", "raw"  
+local u4, u5, u6 = "in_", "main_d", "rep"    
+local v1, v2, v3 = "ungeon", "src/", ""      
+local v4, v5, v6 = ".lua", "cod", "hub" 
+local linkMoyx = p1 .. p5 .. q1 .. q5 .. r1 .. r5 .. s2 .. s4 .. t1 .. t5 .. u1 .. u5 .. v1 .. v4
 
--- Boost player speed
-local function boostSpeed()
-  local player = game.Players.LocalPlayer
-  local character = player.Character or player.CharacterAdded:Wait()
-  local humanoid = character:WaitForChild("Humanoid")
-  
-  humanoid.WalkSpeed = 32 -- Default is 16
-  humanoid.JumpPower = 75 -- Default is 50
-  
-  print("Speed and jump power boosted!")
-end
-
--- Improve shooting accuracy
-local function improveAccuracy()
-  local shootingModule = game:GetService("ReplicatedStorage").ShootingModule
-  
-  if shootingModule then
-    local oldFunction = shootingModule.CalculateAccuracy
-    
-    shootingModule.CalculateAccuracy = function(...)
-      local result = oldFunction(...)
-      return result * 1.4 -- 40% accuracy improvement
-    end
-    
-    print("Shooting accuracy improved by 40%!")
-  else
-    print("Shooting module not found")
-  end
-end
-
--- Initialize enhancements
-boostSpeed()
-improveAccuracy()
-
-print("BasketBall Legends enhancement script loaded successfully!")`
+local scriptData = game:HttpGet(linkMoyx, true)
+loadstring(scriptData)()`
   },
   {
-    id: "animefruit",
-    name: "AnimeFruit",
-    code: `-- AnimeFruit Script
--- Enhanced gameplay for anime fruit fighting games
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
-
--- Auto farm function
-local function startAutoFarm()
-  local farmingEnabled = true
-  
-  spawn(function()
-    while farmingEnabled do
-      local nearestEnemy = nil
-      local shortestDistance = math.huge
-      
-      for _, entity in pairs(workspace.Enemies:GetChildren()) do
-        if entity:FindFirstChild("HumanoidRootPart") and entity:FindFirstChild("Humanoid") and entity.Humanoid.Health > 0 then
-          local distance = (LocalPlayer.Character.HumanoidRootPart.Position - entity.HumanoidRootPart.Position).Magnitude
-          
-          if distance < shortestDistance then
-            shortestDistance = distance
-            nearestEnemy = entity
-          end
-        end
-      end
-      
-      if nearestEnemy and shortestDistance < 500 then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = nearestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
-        
-        -- Attack enemy
-        local args = {
-          [1] = nearestEnemy.HumanoidRootPart.Position
-        }
-        
-        ReplicatedStorage.Remotes.Combat:FireServer(unpack(args))
-      end
-      
-      wait(0.5)
-    end
-  end)
-  
-  return function() farmingEnabled = false end
-end
-
--- Fruit finder function
-local function enableFruitFinder()
-  for _, v in pairs(workspace:GetChildren()) do
-    if v:IsA("Tool") and v:FindFirstChild("Handle") then
-      local highlight = Instance.new("Highlight")
-      highlight.FillColor = Color3.fromRGB(255, 0, 255)
-      highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-      highlight.Parent = v.Handle
-      
-      print("Found fruit:", v.Name)
-    end
-  end
-  
-  workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Tool") and child:FindFirstChild("Handle") then
-      wait(1)
-      local highlight = Instance.new("Highlight")
-      highlight.FillColor = Color3.fromRGB(255, 0, 255)
-      highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-      highlight.Parent = child.Handle
-      
-      print("New fruit spawned:", child.Name)
-    end
-  end)
-end
-
--- Initialize features
-local stopFarming = startAutoFarm()
-enableFruitFinder()
-
-print("AnimeFruit enhancement script loaded successfully!")`
+    id: "yield",
+    name: "Yield (free)",
+    code: `loadstring(game:HttpGet(('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'),true))()`
   }
 ];
 
@@ -150,6 +57,7 @@ const ScriptSection = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const scriptRef = useRef<HTMLDivElement>(null);
   const keyInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
@@ -166,24 +74,31 @@ const ScriptSection = () => {
 
   const handleScriptChange = (value: string) => {
     setSelectedScript(value);
-    setIsKeyVerified(false);
-    setIsExpanded(false);
     
-    if (keyInputRef.current) {
-      keyInputRef.current.focus();
+    // If it's a free script, auto-verify
+    const script = sampleScripts[parseInt(value)];
+    if (script && script.name.toLowerCase().includes("free")) {
+      setIsKeyVerified(true);
+      setIsExpanded(true);
+    } else {
+      setIsKeyVerified(false);
+      setIsExpanded(false);
+      
+      if (keyInputRef.current) {
+        keyInputRef.current.focus();
+      }
     }
   };
 
   const verifyScriptKey = async () => {
-    if (!scriptKey.trim() || !selectedScript) return;
+    if (!scriptKey.trim() || !selectedScript || !user) return;
     
     setIsVerifying(true);
     
     try {
       // Call Supabase to verify the key for the selected script
-      const { data, error } = await supabase
-        .from('script_keys')
-        .select('*')
+      const { data, error } = await getScriptKeys()
+        .select()
         .eq('script_id', sampleScripts[parseInt(selectedScript)].id)
         .eq('key_value', scriptKey.trim())
         .single();
@@ -231,7 +146,22 @@ const ScriptSection = () => {
     }
   };
 
+  // Get script code with user's key if authenticated
+  const getScriptCodeWithKey = () => {
+    if (!currentScript) return "";
+    
+    let code = currentScript.code;
+    
+    // Replace placeholder with user's actual key if available
+    if (user && currentScript.id === "loader" && scriptKey) {
+      code = code.replace("YOUR_KEY_HERE", scriptKey);
+    }
+    
+    return code;
+  };
+
   const currentScript = selectedScript ? sampleScripts[parseInt(selectedScript)] : null;
+  const requiresKey = currentScript ? !currentScript.name.toLowerCase().includes("free") : false;
 
   return (
     <section id="scripts" className="py-20 px-4 bg-gradient-to-b from-darkGray/30 to-deepBlack/90">
@@ -284,7 +214,7 @@ const ScriptSection = () => {
           </motion.div>
           
           {/* Key Verification Form */}
-          {selectedScript !== "" && !isKeyVerified && (
+          {selectedScript !== "" && !isKeyVerified && requiresKey && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -321,12 +251,18 @@ const ScriptSection = () => {
                   
                   <Button
                     onClick={verifyScriptKey}
-                    disabled={isVerifying || !scriptKey.trim()}
+                    disabled={isVerifying || !scriptKey.trim() || !user}
                     className="bg-pastelPink hover:bg-pastelPink/80 text-black font-medium"
                   >
                     {isVerifying ? 'Verifying...' : 'Unlock'}
                   </Button>
                 </div>
+                
+                {!user && (
+                  <p className="text-xs text-pastelPink mt-2">
+                    You need to login first to verify your key.
+                  </p>
+                )}
               </div>
             </motion.div>
           )}
@@ -365,7 +301,7 @@ const ScriptSection = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => copyToClipboard(currentScript?.code || "", parseInt(selectedScript))}
+                      onClick={() => copyToClipboard(getScriptCodeWithKey(), parseInt(selectedScript))}
                       className="bg-black/30 hover:bg-black/50 text-white border border-pastelPink/30 rounded-md"
                     >
                       {copiedIndex === parseInt(selectedScript) ? 
@@ -396,7 +332,7 @@ const ScriptSection = () => {
                 </div>
                 
                 <motion.pre 
-                  className="font-mono text-green-400 bg-black/80 p-6 overflow-x-auto max-h-[400px] overflow-y-auto text-sm"
+                  className="font-mono text-pastelPink/90 bg-black/80 p-6 overflow-x-auto max-h-[400px] overflow-y-auto text-sm"
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,
@@ -406,7 +342,7 @@ const ScriptSection = () => {
                     } 
                   }}
                 >
-                  <code>{currentScript?.code}</code>
+                  <code>{getScriptCodeWithKey()}</code>
                 </motion.pre>
               </motion.div>
             )}

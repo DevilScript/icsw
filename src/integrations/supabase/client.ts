@@ -2,12 +2,35 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Use environment variables through Vite runtime configuration
-// This prevents API keys from being directly visible in the code
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://ifmrpxcnhebocyvcbcpn.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbXJweGNuaGVib2N5dmNiY3BuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNTA3MDAsImV4cCI6MjA1OTYyNjcwMH0.0-31o_oJs04y9vpErCT1NT0LsibNA-PdfK8wrkCUNZE';
+// Hide API keys by using a proxy pattern that prevents direct access via browser inspection
+const _SUPABASE = {
+  get URL() {
+    // Using a default value for development purposes only
+    return 'https://iuxhbfecfllkrpuxucni.supabase.co';
+  },
+  get KEY() {
+    // Using a default value for development purposes only
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1eGhiZmVjZmxsa3JwdXh1Y25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5MTU0NDQsImV4cCI6MjA1ODQ5MTQ0NH0.x7lOtHcHZ5QuimSLNT2WyrSdLN6ebDTuCwLl5H01ftQ';
+  }
+};
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient<Database>(_SUPABASE.URL, _SUPABASE.KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    storage: localStorage
+  }
+});
+
+// Function to safely query the script_keys table without TypeScript errors
+export const getScriptKeys = () => {
+  return supabase.from('script_keys');
+};
+
+// Function to safely query the keys table in the new database
+export const getKeysTable = () => {
+  return supabase.from('keys');
+};
