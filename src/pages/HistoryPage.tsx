@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -44,20 +45,21 @@ const HistoryPage = () => {
           const validTransactions: Transaction[] = data
             .filter(tx => 
               tx && 
-              typeof tx.id === 'string' && 
-              typeof tx.user_id === 'string' && 
-              typeof tx.amount === 'number' && 
-              typeof tx.transaction_type === 'string' &&
-              typeof tx.created_at === 'string'
+              typeof tx === 'object' &&
+              'id' in tx && 
+              'user_id' in tx && 
+              'amount' in tx && 
+              'transaction_type' in tx &&
+              'created_at' in tx
             )
             .map(tx => ({
-              id: tx.id,
-              user_id: tx.user_id,
-              amount: tx.amount,
-              transaction_type: tx.transaction_type,
-              description: tx.description || '',
-              voucher_code: tx.voucher_code,
-              created_at: tx.created_at
+              id: String(tx.id),
+              user_id: String(tx.user_id),
+              amount: Number(tx.amount),
+              transaction_type: String(tx.transaction_type),
+              description: tx.description ? String(tx.description) : '',
+              voucher_code: tx.voucher_code ? String(tx.voucher_code) : undefined,
+              created_at: String(tx.created_at)
             }));
           
           setTransactions(validTransactions);

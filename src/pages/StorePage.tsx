@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -65,19 +66,20 @@ const StorePage = () => {
           const validMaps: MapDefinition[] = mapData
             .filter(map => 
               map && 
-              typeof map.id === 'string' && 
-              typeof map.name === 'string' && 
-              typeof map.price === 'number' && 
-              typeof map.status === 'string' &&
-              Array.isArray(map.allowed_place_ids)
+              typeof map === 'object' &&
+              'id' in map && 
+              'name' in map && 
+              'price' in map && 
+              'status' in map &&
+              'allowed_place_ids' in map
             )
             .map(map => ({
-              id: map.id,
-              name: map.name,
-              price: map.price,
-              status: map.status,
+              id: String(map.id),
+              name: String(map.name),
+              price: Number(map.price),
+              status: String(map.status),
               features: Array.isArray(map.features) ? map.features : [],
-              allowed_place_ids: map.allowed_place_ids
+              allowed_place_ids: Array.isArray(map.allowed_place_ids) ? map.allowed_place_ids : []
             }));
           
           setMaps(validMaps);

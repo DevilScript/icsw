@@ -34,7 +34,7 @@ export const getScriptKeys = () => {
 // we need to use a type assertion for tables not in the types.ts file
 export const getKeysTable = () => {
   // Using type assertion to bypass TypeScript's strict checking
-  return supabase.from('keys' as any);
+  return supabase.from('keys');
 };
 
 // Functions for user balances
@@ -49,7 +49,7 @@ export const createUserBalance = (userId: string) => {
     id: userId, 
     balance: 0,
     updated_at: new Date().toISOString()
-  }] as any[]);
+  }]);
 };
 
 export const updateUserBalance = (userId: string, balance: number) => {
@@ -57,7 +57,7 @@ export const updateUserBalance = (userId: string, balance: number) => {
   return supabase.from('user_balances' as any).update({ 
     balance, 
     updated_at: new Date().toISOString() 
-  } as any).eq('id', userId);
+  }).eq('id', userId);
 };
 
 // Functions for transactions
@@ -69,7 +69,7 @@ export const addTransaction = (data: {
   voucher_code?: string;
 }) => {
   // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('transactions' as any).insert([data] as any[]);
+  return supabase.from('transactions' as any).insert([data]);
 };
 
 export const getUserTransactions = (userId: string) => {
@@ -97,13 +97,13 @@ export const addUserKey = (data: {
   return supabase.from('user_keys' as any).insert([{
     ...data,
     purchased_at: new Date().toISOString()
-  }] as any[]);
+  }]);
 };
 
 export const updateUserKey = (userId: string, key: string, maps: string[]) => {
   // Use 'as any' to bypass type checking since the table might not be in the schema
   return supabase.from('user_keys' as any)
-    .update({ maps } as any)
+    .update({ maps })
     .eq('user_id', userId)
     .eq('key_value', key);
 };

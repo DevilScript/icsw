@@ -3,6 +3,28 @@ import { useState } from 'react';
 import { supabase, getUserBalance, getUserKeys, createUserBalance } from '@/integrations/supabase/client';
 import { UserProfile, UserBalance, UserKey } from './types';
 
+// Type guard to check if an object has the required UserBalance properties
+const isUserBalanceData = (data: any): data is UserBalance => {
+  return (
+    data && 
+    typeof data.id === 'string' && 
+    typeof data.balance === 'number' && 
+    typeof data.updated_at === 'string'
+  );
+};
+
+// Type guard to check if an object has the required UserKey properties
+const isUserKeyData = (data: any): data is UserKey => {
+  return (
+    data && 
+    typeof data.id === 'string' && 
+    typeof data.user_id === 'string' && 
+    typeof data.key_value === 'string' && 
+    typeof data.purchased_at === 'string' && 
+    Array.isArray(data.maps)
+  );
+};
+
 export const useProfileData = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userBalance, setUserBalance] = useState<UserBalance | null>(null);
@@ -45,14 +67,17 @@ export const useProfileData = () => {
           // Try fetching again
           const { data: newBalanceData } = await getUserBalance(userId);
           if (newBalanceData) {
-            // Validate the data matches our UserBalance type
-            if (typeof newBalanceData.id === 'string' && 
-                typeof newBalanceData.balance === 'number' &&
-                typeof newBalanceData.updated_at === 'string') {
+            // Use type guard to validate data
+            if (typeof newBalanceData === 'object' && 
+                newBalanceData !== null && 
+                'id' in newBalanceData && 
+                'balance' in newBalanceData &&
+                'updated_at' in newBalanceData) {
+              
               const validBalance: UserBalance = {
-                id: newBalanceData.id,
-                balance: newBalanceData.balance,
-                updated_at: newBalanceData.updated_at
+                id: String(newBalanceData.id),
+                balance: Number(newBalanceData.balance),
+                updated_at: String(newBalanceData.updated_at)
               };
               setUserBalance(validBalance);
             }
@@ -61,14 +86,17 @@ export const useProfileData = () => {
           console.error('Error fetching user balance:', balanceError);
         }
       } else if (balanceData) {
-        // Validate the data matches our UserBalance type
-        if (typeof balanceData.id === 'string' && 
-            typeof balanceData.balance === 'number' &&
-            typeof balanceData.updated_at === 'string') {
+        // Use type guard to validate data
+        if (typeof balanceData === 'object' && 
+            balanceData !== null && 
+            'id' in balanceData && 
+            'balance' in balanceData &&
+            'updated_at' in balanceData) {
+          
           const validBalance: UserBalance = {
-            id: balanceData.id,
-            balance: balanceData.balance,
-            updated_at: balanceData.updated_at
+            id: String(balanceData.id),
+            balance: Number(balanceData.balance),
+            updated_at: String(balanceData.updated_at)
           };
           setUserBalance(validBalance);
         }
@@ -84,18 +112,19 @@ export const useProfileData = () => {
         const validKeys: UserKey[] = keysData
           .filter(key => 
             key && 
-            typeof key.id === 'string' &&
-            typeof key.user_id === 'string' &&
-            typeof key.key_value === 'string' &&
-            typeof key.purchased_at === 'string' &&
-            Array.isArray(key.maps)
+            typeof key === 'object' &&
+            'id' in key &&
+            'user_id' in key &&
+            'key_value' in key &&
+            'purchased_at' in key &&
+            'maps' in key
           )
           .map(key => ({
-            id: key.id,
-            user_id: key.user_id,
-            key_value: key.key_value,
-            maps: key.maps || [],
-            purchased_at: key.purchased_at
+            id: String(key.id),
+            user_id: String(key.user_id),
+            key_value: String(key.key_value),
+            maps: Array.isArray(key.maps) ? key.maps : [],
+            purchased_at: String(key.purchased_at)
           }));
         
         setUserKeys(validKeys);
