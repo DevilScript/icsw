@@ -31,7 +31,7 @@ serve(async (req) => {
       );
     }
 
-    // Get map details
+    // Get map details from map_definitions
     const { data: mapData, error: mapError } = await supabase
       .from('map_definitions')
       .select('*')
@@ -39,6 +39,7 @@ serve(async (req) => {
       .single();
 
     if (mapError || !mapData) {
+      console.error('Error fetching map:', mapError);
       return new Response(
         JSON.stringify({ error: 'Map not found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
@@ -53,6 +54,7 @@ serve(async (req) => {
       .single();
 
     if (userError || !userData) {
+      console.error('Error fetching user balance:', userError);
       return new Response(
         JSON.stringify({ error: 'User balance not found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
@@ -91,6 +93,7 @@ serve(async (req) => {
         .limit(1);
 
       if (availableKeysError || !availableKeys || availableKeys.length === 0) {
+        console.error('Error fetching available keys:', availableKeysError);
         return new Response(
           JSON.stringify({ error: 'No keys available' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
@@ -99,12 +102,19 @@ serve(async (req) => {
 
       keyData = availableKeys[0];
 
+      // Convert allowed_place_ids to bigint[] if they are strings
+      const placeIds = mapData.allowed_place_ids.map((id: string) => {
+        // Try to convert to bigint if it's a string number
+        const numId = parseInt(id, 10);
+        return isNaN(numId) ? id : numId;
+      });
+
       // Update the key with map info
       await supabase
         .from('keys')
         .update({
           maps: [map_name],
-          allowed_place_ids: mapData.allowed_place_ids
+          allowed_place_ids: placeIds
         })
         .eq('key', keyData.key);
 
@@ -140,6 +150,7 @@ serve(async (req) => {
         .single();
 
       if (keyDetailsError || !keyDetails) {
+        console.error('Error fetching key details:', keyDetailsError);
         return new Response(
           JSON.stringify({ error: 'Key details not found' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
@@ -154,11 +165,15 @@ serve(async (req) => {
       // Get current allowed_place_ids
       const currentPlaceIds = keyDetails.allowed_place_ids || [];
       
-      // Add new allowed_place_ids
-      const updatedPlaceIds = [
-        ...currentPlaceIds,
-        ...mapData.allowed_place_ids
-      ];
+      // Convert allowed_place_ids to bigint[] if they are strings
+      const newPlaceIds = mapData.allowed_place_ids.map((id: string) => {
+        // Try to convert to bigint if it's a string number
+        const numId = parseInt(id, 10);
+        return isNaN(numId) ? id : numId;
+      });
+      
+      // Add new allowed_place_ids - avoid duplicates
+      const updatedPlaceIds = [...new Set([...currentPlaceIds, ...newPlaceIds])];
       
       // Update user_keys
       await supabase

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -55,32 +56,32 @@ const StorePage = () => {
       try {
         const { data: mapData, error: mapError } = await getMapDefinitions();
         
-        if (mapError) throw mapError;
+        if (mapError) {
+          console.error('Error fetching map definitions:', mapError);
+          throw mapError;
+        }
         
         if (mapData && Array.isArray(mapData)) {
-          const filteredData = mapData.filter(item => 
-            item !== null && 
-            typeof item === 'object'
-          );
-          
-          const validMaps: MapDefinition[] = filteredData.map(item => {
-            const map = item as any;
-            return {
-              id: String(map.id || ''),
-              name: String(map.name || ''),
-              price: Number(map.price || 0),
-              status: String(map.status || ''),
-              features: Array.isArray(map.features) ? map.features : [],
-              allowed_place_ids: Array.isArray(map.allowed_place_ids) ? map.allowed_place_ids : []
-            };
-          });
+          const validMaps: MapDefinition[] = mapData.map(map => ({
+            id: map.id || '',
+            name: map.name || '',
+            price: Number(map.price) || 0,
+            status: map.status || 'Unknown',
+            features: Array.isArray(map.features) ? map.features : [],
+            allowed_place_ids: Array.isArray(map.allowed_place_ids) ? map.allowed_place_ids : []
+          }));
           
           setMaps(validMaps);
         }
         
         const { count, error: countError } = await countAvailableKeys();
-        if (countError) throw countError;
-        if (count !== null) setAvailableKeys(count);
+        
+        if (countError) {
+          console.error('Error counting available keys:', countError);
+          throw countError;
+        }
+        
+        setAvailableKeys(count || 0);
       } catch (error) {
         console.error('Error fetching store data:', error);
         toast({
@@ -144,10 +145,12 @@ const StorePage = () => {
       return;
     }
     
-    if (maps.find(m => m.id === selectedMap) && userBalance && userBalance.balance < maps.find(m => m.id === selectedMap)!.price) {
+    const mapToPurchase = maps.find(m => m.id === selectedMap);
+    
+    if (mapToPurchase && userBalance && userBalance.balance < mapToPurchase.price) {
       toast({
         title: "Insufficient balance",
-        description: `You need ${maps.find(m => m.id === selectedMap)!.price} THB to purchase this map`,
+        description: `You need ${mapToPurchase.price} THB to purchase this map`,
         variant: "destructive"
       });
       return;

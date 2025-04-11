@@ -1,66 +1,44 @@
 
-import { Session, User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 
-export type UserProfile = {
-  id: string;
-  nickname: string;
-  avatar_url?: string;
-  created_at: string;
-};
-
-export type UserBalance = {
-  id: string;
-  balance: number;
-  updated_at: string;
-};
-
-export type UserKey = {
-  id: string;
-  user_id: string;
-  key_value: string;
-  maps: string[];
-  purchased_at: string;
-};
-
-export type Transaction = {
-  id: string;
-  user_id: string;
-  amount: number;
-  transaction_type: string;
-  description: string;
-  voucher_code?: string;
-  created_at: string;
-};
-
-export type MapDefinition = {
+export interface MapDefinition {
   id: string;
   name: string;
   price: number;
   status: string;
   features: string[];
   allowed_place_ids: string[];
-};
+}
 
-export type AuthContextType = {
+export interface UserProfile {
+  id: string;
+  nickname: string;
+  avatar_url?: string;
+  created_at: string;
+}
+
+export interface UserBalance {
+  id: string;
+  balance: number;
+  updated_at: string;
+}
+
+export interface UserKey {
+  id: string;
+  user_id: string;
+  key_value: string;
+  purchased_at: string;
+  maps: string[];
+}
+
+export interface AuthContextType {
   session: Session | null;
   user: User | null;
   userProfile: UserProfile | null;
   userBalance: UserBalance | null;
   userKeys: UserKey[] | null;
-  signUp: (email: string, password: string, nickname: string) => Promise<{
-    error: Error | null;
-    data: any | null;
-  }>;
-  signIn: (email: string, password: string) => Promise<{
-    error: Error | null;
-    data: any | null;
-  }>;
   signInWithDiscord: () => Promise<void>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{
-    error: Error | null;
-    data: any | null;
-  }>;
   loading: boolean;
   refreshUserData: () => Promise<void>;
-};
+}

@@ -25,146 +25,180 @@ export const supabase = createClient<Database>(_SUPABASE.URL, _SUPABASE.KEY, {
   }
 });
 
-// Function to safely query the script_keys table without TypeScript errors
-export const getScriptKeys = () => {
-  return supabase.from('script_keys');
+// Function to safely query the script_keys table
+export const getScriptKeys = async () => {
+  return supabase.from('script_keys').select('*');
 };
 
-// Due to TypeScript limitations with the current Database type definition,
-// we need to use a type assertion for tables not in the types.ts file
-export const getKeysTable = () => {
-  // Using type assertion to bypass TypeScript's strict checking
-  return supabase.from('keys');
+// Function to safely query the keys table
+export const getKeysTable = async () => {
+  return supabase.from('keys').select('*');
+};
+
+// Functions for map definitions
+export const getMapDefinitions = async () => {
+  const { data, error } = await supabase
+    .from('map_definitions')
+    .select('*');
+  
+  if (error) {
+    console.error('Error fetching map definitions:', error);
+    throw error;
+  }
+  
+  return { data, error };
+};
+
+// Get available keys (maps is empty array and status is Pending)
+export const getAvailableKey = async () => {
+  const { data, error } = await supabase
+    .from('keys')
+    .select('*')
+    .eq('status', 'Pending')
+    .is('hwid', null)
+    .or('maps.len().eq.0,maps.eq.{}')
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching available key:', error);
+    throw error;
+  }
+  
+  return { data, error };
+};
+
+// Update key with map information
+export const updateKeyWithMap = async (key: string, mapName: string, placeIds: any[]) => {
+  const { data, error } = await supabase
+    .from('keys')
+    .update({
+      maps: [mapName],
+      allowed_place_ids: placeIds
+    })
+    .eq('key', key);
+  
+  if (error) {
+    console.error('Error updating key with map:', error);
+    throw error;
+  }
+  
+  return { data, error };
+};
+
+// Count available keys
+export const countAvailableKeys = async () => {
+  const { count, error } = await supabase
+    .from('keys')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'Pending')
+    .is('hwid', null)
+    .or('maps.len().eq.0,maps.eq.{}');
+  
+  if (error) {
+    console.error('Error counting available keys:', error);
+    throw error;
+  }
+  
+  return { count, error };
 };
 
 // Functions for user balances
-export const getUserBalance = (userId: string) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('user_balances' as any).select('*').eq('id', userId).single();
+export const getUserBalance = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('user_balances')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  
+  return { data, error };
 };
 
-export const createUserBalance = (userId: string) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('user_balances' as any).insert([{ 
-    id: userId, 
-    balance: 0,
-    updated_at: new Date().toISOString()
-  }]);
+export const createUserBalance = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('user_balances')
+    .insert([{ 
+      id: userId, 
+      balance: 0,
+      updated_at: new Date().toISOString()
+    }]);
+  
+  return { data, error };
 };
 
-export const updateUserBalance = (userId: string, balance: number) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('user_balances' as any).update({ 
-    balance, 
-    updated_at: new Date().toISOString() 
-  }).eq('id', userId);
+export const updateUserBalance = async (userId: string, balance: number) => {
+  const { data, error } = await supabase
+    .from('user_balances')
+    .update({ 
+      balance, 
+      updated_at: new Date().toISOString() 
+    })
+    .eq('id', userId);
+  
+  return { data, error };
 };
 
 // Functions for transactions
-export const addTransaction = (data: {
+export const addTransaction = async (data: {
   user_id: string;
   amount: number;
   transaction_type: 'topup' | 'purchase';
   description?: string;
   voucher_code?: string;
 }) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('transactions' as any).insert([data]);
+  const { error } = await supabase
+    .from('transactions')
+    .insert([data]);
+  
+  return { error };
 };
 
-export const getUserTransactions = (userId: string) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('transactions' as any)
+export const getUserTransactions = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('transactions')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
+  
+  return { data, error };
 };
 
 // Functions for user keys
-export const getUserKeys = (userId: string) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('user_keys' as any)
+export const getUserKeys = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('user_keys')
     .select('*')
     .eq('user_id', userId);
+  
+  return { data, error };
 };
 
-export const addUserKey = (data: {
+export const addUserKey = async (data: {
   user_id: string;
   key_value: string;
   maps: string[];
 }) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('user_keys' as any).insert([{
-    ...data,
-    purchased_at: new Date().toISOString()
-  }]);
+  const { error } = await supabase
+    .from('user_keys')
+    .insert([{
+      ...data,
+      purchased_at: new Date().toISOString()
+    }]);
+  
+  return { error };
 };
 
-export const updateUserKey = (userId: string, key: string, maps: string[]) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('user_keys' as any)
-    .update({ maps })
-    .eq('user_id', userId)
-    .eq('key_value', key);
-};
-
-// Functions for available keys
-export const getAvailableKey = () => {
-  return getKeysTable()
-    .select()
-    .eq('status', 'Pending')
-    .is('hwid', null)
-    .or('maps.len().eq.0,maps.eq.{}');
-};
-
-export const updateKeyWithMap = (key: string, mapName: string, placeIds: any[]) => {
-  return getKeysTable()
-    .update({
-      maps: [mapName],
-      allowed_place_ids: placeIds
-    })
-    .eq('key', key);
-};
-
-export const updateKeyMaps = (key: string, maps: string[], placeIds: any[]) => {
-  return getKeysTable()
-    .update({
-      maps: maps,
-      allowed_place_ids: placeIds
-    })
-    .eq('key', key);
-};
-
-export const countAvailableKeys = () => {
-  return getKeysTable()
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'Pending')
-    .is('hwid', null)
-    .or('maps.len().eq.0,maps.eq.{}');
-};
-
-// Functions for map definitions
-export const getMapDefinitions = () => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('map_definitions' as any).select('*');
-};
-
-export const getMapById = (id: string) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('map_definitions' as any).select('*').eq('id', id).single();
-};
-
-export const getMapByName = (name: string) => {
-  // Use 'as any' to bypass type checking since the table might not be in the schema
-  return supabase.from('map_definitions' as any).select('*').eq('name', name).single();
-};
-
-// Function to reset key HWID
-export const resetKeyHWID = (key: string) => {
-  return supabase.rpc('reset_key_hwid', { key_to_reset: key });
+// Reset key HWID
+export const resetKeyHWID = async (key: string) => {
+  const { data, error } = await supabase
+    .rpc('reset_key_hwid', { key_to_reset: key });
+  
+  return { data, error };
 };
 
 // Function to redeem TrueMoney voucher
-export const redeemTrueMoneyVoucher = (voucher_code: string, user_id: string) => {
-  return supabase.rpc('redeem_truemoney_voucher', { voucher_code, user_id });
+export const redeemTrueMoneyVoucher = async (voucher_code: string, user_id: string) => {
+  const { data, error } = await supabase
+    .rpc('redeem_truemoney_voucher', { voucher_code, user_id });
+  
+  return { data, error };
 };

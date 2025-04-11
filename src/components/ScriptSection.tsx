@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { getScriptKeys } from "@/integrations/supabase/client";
+import { getScriptKeys, supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/auth';
 
 const sampleScripts = [
@@ -100,45 +100,22 @@ const ScriptSection = () => {
   const verifyScriptKey = async () => {
     if (!scriptKey.trim() || !selectedScript || !user) return;
     
-    // If user is logged in and has keys, check if the key matches one of their keys
-    if (user && userKeys && userKeys.length > 0) {
-      const userKey = userKeys[0].key_value;
-      
-      if (scriptKey.trim() === userKey) {
-        setIsKeyVerified(true);
-        setIsExpanded(true);
-        
-        toast({
-          title: "Key verified!",
-          description: "You now have access to the script.",
-          className: "bg-gray-800 border-green-500 text-white",
-        });
-        
-        // Scroll to script if needed
-        if (scriptRef.current) {
-          setTimeout(() => {
-            scriptRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 100);
-        }
-        return;
-      }
-    }
-    
     setIsVerifying(true);
     
     try {
-      // Call Supabase to verify the key for the selected script
-      const { data, error } = await getScriptKeys()
-        .select()
-        .eq('script_id', sampleScripts[parseInt(selectedScript)].id)
-        .eq('key_value', scriptKey.trim())
+      // Check if the key exists in the keys table
+      const { data: keyData, error: keyError } = await supabase
+        .from('keys')
+        .select('*')
+        .eq('key', scriptKey.trim())
         .single();
       
-      if (error) {
-        throw error;
+      if (keyError) {
+        console.error("Error checking key:", keyError);
+        throw new Error("Invalid key or key not found");
       }
       
-      if (data) {
+      if (keyData) {
         setIsKeyVerified(true);
         setIsExpanded(true);
         
@@ -184,7 +161,7 @@ const ScriptSection = () => {
     let code = currentScript.code;
     
     // Replace placeholder with user's actual key if available
-    if (user && currentScript.id === "loader" && scriptKey) {
+    if (currentScript.id === "loader" && scriptKey) {
       code = code.replace("YOUR_KEY_HERE", scriptKey);
     }
     

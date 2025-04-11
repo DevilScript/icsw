@@ -74,6 +74,27 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     navigate('/');
   };
 
+  const handleNavigate = (href: string) => {
+    setIsMenuOpen(false); // Close mobile menu if open
+    
+    if (href.startsWith('#')) {
+      // Handle anchor links (for the same page)
+      if (location.pathname === '/') {
+        // On home page, scroll to the section
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Not on home page, navigate to home page with anchor
+        navigate('/' + href);
+      }
+    } else {
+      // Regular navigation
+      navigate(href);
+    }
+  };
+
   const handleSupportSubmit = async () => {
     if (!supportMessage.trim()) {
       toast({
@@ -191,18 +212,30 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center justify-center space-x-8 flex-1">
-            <a href="#scripts" className="text-white hover:text-pastelPink transition-colors">
+            <button 
+              onClick={() => handleNavigate('#scripts')}
+              className="text-white hover:text-pastelPink transition-colors"
+            >
               Scripts
-            </a>
-            <Link to="/store" className="text-white hover:text-pastelPink transition-colors">
+            </button>
+            <button
+              onClick={() => handleNavigate('/store')}
+              className="text-white hover:text-pastelPink transition-colors"
+            >
               Store
-            </Link>
-            <Link to="/topup" className="text-white hover:text-pastelPink transition-colors">
+            </button>
+            <button
+              onClick={() => handleNavigate('/topup')}
+              className="text-white hover:text-pastelPink transition-colors"
+            >
               Topup
-            </Link>
-            <a href="#support" className="text-white hover:text-pastelPink transition-colors">
+            </button>
+            <button
+              onClick={() => handleNavigate('#support')}
+              className="text-white hover:text-pastelPink transition-colors"
+            >
               Support
-            </a>
+            </button>
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -305,34 +338,30 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       {isMenuOpen && (
         <div className="md:hidden bg-black/90 backdrop-blur-lg border-b border-pastelPink/20 py-4 px-4 animate-fade-in">
           <div className="flex flex-col space-y-4">
-            <a 
-              href="#scripts" 
+            <button 
               className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => handleNavigate('#scripts')}
             >
               Scripts
-            </a>
-            <Link 
-              to="/store" 
+            </button>
+            <button 
               className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => handleNavigate('/store')}
             >
               Store
-            </Link>
-            <Link 
-              to="/topup" 
+            </button>
+            <button 
               className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => handleNavigate('/topup')}
             >
               Topup
-            </Link>
-            <a 
-              href="#support" 
+            </button>
+            <button 
               className="text-white hover:text-pastelPink px-3 py-2 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => handleNavigate('#support')}
             >
               Support
-            </a>
+            </button>
             
             <div className="pt-2 space-y-2">
               <button 
