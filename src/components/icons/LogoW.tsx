@@ -17,16 +17,12 @@ const LogoW = ({ className = "h-6 w-6" }: LogoWProps) => {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <g>
-        <text
-          x="0"
-          y="16"
-          fontSize="16"
-          fontWeight="bold"
-          fill="currentColor"
-        >
-          ICS<tspan fill="#ffb3d1">W</tspan>
-        </text>
+      <g className="text-pastelPink">
+        <path
+          d="M4 4L8 20L12 10L16 20L20 4"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        />
       </g>
     </svg>
   );
