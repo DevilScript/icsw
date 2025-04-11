@@ -18,6 +18,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from '@/lib/utils';
+import LogoW from './icons/LogoW';
 
 const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
   const { user, userProfile, userBalance, signOut } = useAuth();
@@ -26,7 +27,7 @@ const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
     <nav className="bg-deepBlack border-b border-pastelPink/20 py-4">
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold text-white">
-          ICSW
+          <LogoW className="h-8 w-auto" />
         </Link>
         
         <div className="hidden md:flex items-center space-x-4">

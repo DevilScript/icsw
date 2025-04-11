@@ -5,17 +5,14 @@ import Hero from '@/components/Hero';
 import ScriptSection from '@/components/ScriptSection';
 import SupportSection from '@/components/SupportSection';
 import Footer from '@/components/Footer';
-import Features from '@/components/Features';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useAuth } from '@/context/auth';
-import LoginModal from '@/components/LoginModal';
 
 const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Handle login button click
   const handleLoginClick = () => {
@@ -23,7 +20,7 @@ const Index = () => {
       // If logged in, navigate to profile or dashboard in the future
       return;
     }
-    setIsLoginModalOpen(true);
+    navigate('/auth');
   };
 
   return (
@@ -62,12 +59,9 @@ const Index = () => {
         <Navbar onLoginClick={handleLoginClick} />
         <Hero />
         <ScriptSection />
-        <Features />
         <SupportSection />
         <Footer />
       </div>
-
-      <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />
     </div>
   );
 };

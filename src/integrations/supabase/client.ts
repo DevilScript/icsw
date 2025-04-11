@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -61,8 +62,7 @@ export const getAvailableKey = async () => {
       .select('*')
       .eq('status', 'Pending')
       .is('hwid', null)
-      .or('maps.len().eq.0,maps.eq.{}')
-      .limit(1);
+      .or('maps.len().eq.0,maps.is.null');
     
     if (error) {
       console.error('Error fetching available key:', error);
@@ -102,7 +102,7 @@ export const countAvailableKeys = async () => {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Pending')
       .is('hwid', null)
-      .or('maps.len().eq.0,maps.eq.{}');
+      .or('maps.len().eq.0,maps.is.null');
     
     if (error) {
       console.error('Error counting available keys:', error);
