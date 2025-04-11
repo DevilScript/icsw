@@ -33,7 +33,7 @@ const SupportSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             viewport={{ once: true }}
-            className="glass-effect border border-pastelPink/30 p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)]"
+            className="glass-effect border border-pastelPink/30 p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)] hover:scale-105 hover:bg-gray-800/60 transition-all duration-300"
           >
             <h3 className="text-xl font-semibold mb-4 text-center">Supported Maps</h3>
             <ul className="space-y-2">
@@ -54,7 +54,7 @@ const SupportSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             viewport={{ once: true }}
-            className="glass-effect border border-pastelPink/30 p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)]"
+            className="glass-effect border border-pastelPink/30 p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)] hover:scale-105 hover:bg-gray-800/60 transition-all duration-300"
           >
             <h3 className="text-xl font-semibold mb-4 text-center">Supported Executors</h3>
             <ul className="space-y-2">
