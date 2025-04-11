@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/auth';
@@ -8,6 +9,15 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { cn } from '@/lib/utils';
 
 const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
   const { user, userProfile, userBalance, signOut } = useAuth();
@@ -18,6 +28,58 @@ const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
         <Link to="/" className="text-2xl font-bold text-white">
           ICSW
         </Link>
+        
+        <div className="hidden md:flex items-center space-x-4">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link to="/">
+                  <NavigationMenuLink className="text-white hover:text-pastelPink px-4 py-2 transition-colors">
+                    Home
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/store">
+                  <NavigationMenuLink className="text-white hover:text-pastelPink px-4 py-2 transition-colors">
+                    Store
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/topup">
+                  <NavigationMenuLink className="text-white hover:text-pastelPink px-4 py-2 transition-colors">
+                    Topup
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="text-white hover:text-pastelPink px-4 py-2 transition-colors bg-transparent hover:bg-transparent">
+                  More
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-4 w-[200px] bg-gray-800/95 backdrop-blur-md border border-pastelPink/30 rounded-md">
+                    <li>
+                      <Link to="/history">
+                        <NavigationMenuLink className="text-white hover:text-pastelPink px-2 py-2 block transition-colors">
+                          History
+                        </NavigationMenuLink>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/reset-hwid">
+                        <NavigationMenuLink className="text-white hover:text-pastelPink px-2 py-2 block transition-colors">
+                          Reset HWID
+                        </NavigationMenuLink>
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+
         <div className="flex items-center space-x-4">
           {user ? (
             <div className="flex items-center space-x-2">
