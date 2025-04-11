@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -37,34 +36,44 @@ export const getKeysTable = async () => {
 
 // Functions for map definitions
 export const getMapDefinitions = async () => {
-  const { data, error } = await supabase
-    .from('map_definitions')
-    .select('*');
-  
-  if (error) {
-    console.error('Error fetching map definitions:', error);
-    throw error;
+  try {
+    const { data, error } = await supabase
+      .from('map_definitions')
+      .select('id, name, price, status, features, allowed_place_ids');
+    
+    if (error) {
+      console.error('Error fetching map definitions:', error);
+      throw error;
+    }
+    
+    return { data, error };
+  } catch (error) {
+    console.error('Exception in getMapDefinitions:', error);
+    return { data: null, error };
   }
-  
-  return { data, error };
 };
 
 // Get available keys (maps is empty array and status is Pending)
 export const getAvailableKey = async () => {
-  const { data, error } = await supabase
-    .from('keys')
-    .select('*')
-    .eq('status', 'Pending')
-    .is('hwid', null)
-    .or('maps.len().eq.0,maps.eq.{}')
-    .limit(1);
-  
-  if (error) {
-    console.error('Error fetching available key:', error);
-    throw error;
+  try {
+    const { data, error } = await supabase
+      .from('keys')
+      .select('*')
+      .eq('status', 'Pending')
+      .is('hwid', null)
+      .or('maps.len().eq.0,maps.eq.{}')
+      .limit(1);
+    
+    if (error) {
+      console.error('Error fetching available key:', error);
+      throw error;
+    }
+    
+    return { data, error };
+  } catch (error) {
+    console.error('Exception in getAvailableKey:', error);
+    return { data: null, error: error };
   }
-  
-  return { data, error };
 };
 
 // Update key with map information
@@ -87,19 +96,24 @@ export const updateKeyWithMap = async (key: string, mapName: string, placeIds: a
 
 // Count available keys
 export const countAvailableKeys = async () => {
-  const { count, error } = await supabase
-    .from('keys')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'Pending')
-    .is('hwid', null)
-    .or('maps.len().eq.0,maps.eq.{}');
-  
-  if (error) {
-    console.error('Error counting available keys:', error);
-    throw error;
+  try {
+    const { count, error } = await supabase
+      .from('keys')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Pending')
+      .is('hwid', null)
+      .or('maps.len().eq.0,maps.eq.{}');
+    
+    if (error) {
+      console.error('Error counting available keys:', error);
+      throw error;
+    }
+    
+    return { count, error };
+  } catch (error) {
+    console.error('Exception in countAvailableKeys:', error);
+    return { count: 0, error: error };
   }
-  
-  return { count, error };
 };
 
 // Functions for user balances

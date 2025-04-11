@@ -30,6 +30,11 @@ const Features = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 0 25px rgba(255,179,209,0.3)",
+                backgroundColor: "rgba(255,179,209,0.1)"
+              }}
               className="section-hover transition-all duration-300 glass-effect border border-pastelPink/30 p-6 rounded-xl shadow-[0_0_15px_rgba(255,179,209,0.15)]"
             >
               <h3 className="text-xl font-semibold text-white mb-4">{feature.title}</h3>
