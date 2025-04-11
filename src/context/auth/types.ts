@@ -31,6 +31,16 @@ export interface UserKey {
   maps: string[];
 }
 
+export interface Transaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  transaction_type: string;
+  description?: string;
+  voucher_code?: string;
+  created_at: string;
+}
+
 export interface AuthContextType {
   session: Session | null;
   user: User | null;
