@@ -1,18 +1,9 @@
 
 import { User, Session } from '@supabase/supabase-js';
 
-export interface MapDefinition {
-  id: string;
-  name: string;
-  price: number;
-  status: string;
-  features: string[];
-  allowed_place_ids: string[];
-}
-
 export interface UserProfile {
   id: string;
-  nickname: string;
+  nickname?: string;
   avatar_url?: string;
   created_at: string;
 }
@@ -27,18 +18,17 @@ export interface UserKey {
   id: string;
   user_id: string;
   key_value: string;
-  purchased_at: string;
   maps: string[];
+  purchased_at: string;
 }
 
-export interface Transaction {
+export interface MapDefinition {
   id: string;
-  user_id: string;
-  amount: number;
-  transaction_type: string;
-  description?: string;
-  voucher_code?: string;
-  created_at: string;
+  name: string;
+  price: number;
+  status: string;
+  features: string[];
+  allowed_place_ids: number[];
 }
 
 export interface AuthContextType {

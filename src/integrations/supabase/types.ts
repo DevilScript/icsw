@@ -13,7 +13,7 @@ export type Database = {
         Row: {
           allowed_place_ids: number[] | null
           allowexec: string[] | null
-          created: string | null
+          created_at: string | null
           days: number
           exploit: string | null
           hwid: string | null
@@ -25,7 +25,7 @@ export type Database = {
         Insert: {
           allowed_place_ids?: number[] | null
           allowexec?: string[] | null
-          created?: string | null
+          created_at?: string | null
           days?: number
           exploit?: string | null
           hwid?: string | null
@@ -37,7 +37,7 @@ export type Database = {
         Update: {
           allowed_place_ids?: number[] | null
           allowexec?: string[] | null
-          created?: string | null
+          created_at?: string | null
           days?: number
           exploit?: string | null
           hwid?: string | null
@@ -50,7 +50,7 @@ export type Database = {
       }
       map_definitions: {
         Row: {
-          allowed_place_ids: string[]
+          allowed_place_ids: number[] | null
           features: string[] | null
           id: string
           name: string
@@ -58,7 +58,7 @@ export type Database = {
           status: string
         }
         Insert: {
-          allowed_place_ids: string[]
+          allowed_place_ids?: number[] | null
           features?: string[] | null
           id?: string
           name: string
@@ -66,7 +66,7 @@ export type Database = {
           status?: string
         }
         Update: {
-          allowed_place_ids?: string[]
+          allowed_place_ids?: number[] | null
           features?: string[] | null
           id?: string
           name?: string
@@ -75,52 +75,10 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          id: string
-          nickname: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          id: string
-          nickname?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          id?: string
-          nickname?: string | null
-        }
-        Relationships: []
-      }
-      script_keys: {
-        Row: {
-          created_at: string
-          id: string
-          key_value: string
-          script_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          key_value: string
-          script_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          key_value?: string
-          script_id?: string
-        }
-        Relationships: []
-      }
       transactions: {
         Row: {
           amount: number
-          created_at: string
+          created_at: string | null
           description: string | null
           id: string
           transaction_type: string
@@ -129,7 +87,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           transaction_type: string
@@ -138,7 +96,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           transaction_type?: string
@@ -151,17 +109,17 @@ export type Database = {
         Row: {
           balance: number
           id: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           balance?: number
           id: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           balance?: number
           id?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -170,21 +128,21 @@ export type Database = {
           id: string
           key_value: string
           maps: string[] | null
-          purchased_at: string
+          purchased_at: string | null
           user_id: string
         }
         Insert: {
           id?: string
           key_value: string
           maps?: string[] | null
-          purchased_at?: string
+          purchased_at?: string | null
           user_id: string
         }
         Update: {
           id?: string
           key_value?: string
           maps?: string[] | null
-          purchased_at?: string
+          purchased_at?: string | null
           user_id?: string
         }
         Relationships: []

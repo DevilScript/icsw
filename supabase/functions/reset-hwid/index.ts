@@ -21,53 +21,48 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { user_id } = await req.json();
+    const { key, user_id } = await req.json();
 
     // Validate input
-    if (!user_id) {
+    if (!key || !user_id) {
       return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
+        JSON.stringify({ error: 'Key and user ID are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
-    // Get user's key
-    const { data: userKey, error: userKeyError } = await supabase
-      .from('user_keys')
-      .select('key_value')
-      .eq('user_id', user_id)
-      .single();
-
-    if (userKeyError || !userKey) {
-      return new Response(
-        JSON.stringify({ error: 'No key found for this user' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-      );
-    }
-
-    // Reset HWID using RPC function
+    // Call reset_key_hwid function
     const { data: resetResult, error: resetError } = await supabase
-      .rpc('reset_key_hwid', { key_to_reset: userKey.key_value });
+      .rpc('reset_key_hwid', { key_to_reset: key });
 
     if (resetError) {
-      throw resetError;
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to reset HWID',
+          message: resetError.message
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
 
     if (!resetResult) {
       return new Response(
-        JSON.stringify({ error: 'Failed to reset HWID' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        JSON.stringify({ 
+          error: 'Key not found',
+          message: 'The provided key was not found in the database'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
 
-    // Get user profile
+    // Fetch user profile for webhook
     const { data: profileData } = await supabase
       .from('profiles')
       .select('nickname')
       .eq('id', user_id)
       .single();
 
-    // Send webhook
+    // Send webhook to Discord
     try {
       await fetch(WEBHOOK_URL, {
         method: 'POST',
@@ -77,14 +72,7 @@ serve(async (req) => {
         body: JSON.stringify({
           embeds: [{
             title: '🔄 HWID Reset',
-            description: `User **${profileData?.nickname || user_id}** has reset their HWID`,
-            fields: [
-              {
-                name: 'Key',
-                value: userKey.key_value,
-                inline: true
-              }
-            ],
+            description: `User **${profileData?.nickname || user_id}** reset HWID for key \`${key}\``,
             color: 5814783, // Light pink
             timestamp: new Date().toISOString()
           }]
@@ -102,9 +90,9 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error processing HWID reset:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error', message: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }

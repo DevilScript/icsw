@@ -31,197 +31,154 @@ serve(async (req) => {
       );
     }
 
-    // Get map details from map_definitions
+    // Get map definition from database
     const { data: mapData, error: mapError } = await supabase
       .from('map_definitions')
       .select('*')
       .eq('name', map_name)
       .single();
 
-    if (mapError || !mapData) {
-      console.error('Error fetching map:', mapError);
+    if (mapError) {
       return new Response(
-        JSON.stringify({ error: 'Map not found' }),
+        JSON.stringify({ error: 'Map not found', message: mapError.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
 
-    // Check user balance
-    const { data: userData, error: userError } = await supabase
+    // Get user balance from database
+    const { data: balanceData, error: balanceError } = await supabase
       .from('user_balances')
       .select('balance')
       .eq('id', user_id)
       .single();
 
-    if (userError || !userData) {
-      console.error('Error fetching user balance:', userError);
+    if (balanceError) {
       return new Response(
-        JSON.stringify({ error: 'User balance not found' }),
+        JSON.stringify({ error: 'User balance not found', message: balanceError.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
 
     // Check if user has enough balance
-    if (userData.balance < mapData.price) {
+    const mapPrice = parseFloat(mapData.price);
+    const userBalance = parseFloat(balanceData.balance);
+
+    if (userBalance < mapPrice) {
       return new Response(
         JSON.stringify({ 
           error: 'Insufficient balance',
-          current_balance: userData.balance,
-          required: mapData.price
+          message: `You need ${mapPrice} THB to purchase this map`
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
-    // Check if the user already has a key
-    const { data: existingUserKey, error: keyError } = await supabase
-      .from('user_keys')
+    // Get an available key
+    const { data: keyData, error: keyError } = await supabase
+      .from('keys')
       .select('*')
-      .eq('user_id', user_id)
+      .eq('status', 'Pending')
+      .is('hwid', null)
+      .or('maps.len().eq.0,maps.eq.{}')
+      .limit(1)
       .single();
 
-    let keyData;
-    
-    if (!existingUserKey) {
-      // User doesn't have a key, get a new one from available keys
-      const { data: availableKeys, error: availableKeysError } = await supabase
-        .from('keys')
-        .select('*')
-        .eq('status', 'Pending')
-        .is('hwid', null)
-        .or('maps.len().eq.0,maps.eq.{}')
-        .limit(1);
-
-      if (availableKeysError || !availableKeys || availableKeys.length === 0) {
-        console.error('Error fetching available keys:', availableKeysError);
-        return new Response(
-          JSON.stringify({ error: 'No keys available' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-        );
-      }
-
-      keyData = availableKeys[0];
-
-      // Convert allowed_place_ids to bigint[] if they are strings
-      const placeIds = mapData.allowed_place_ids.map((id: string) => {
-        // Try to convert to bigint if it's a string number
-        const numId = parseInt(id, 10);
-        return isNaN(numId) ? id : numId;
-      });
-
-      // Update the key with map info
-      await supabase
-        .from('keys')
-        .update({
-          maps: [map_name],
-          allowed_place_ids: placeIds
-        })
-        .eq('key', keyData.key);
-
-      // Add key to user_keys
-      await supabase
-        .from('user_keys')
-        .insert({
-          user_id,
-          key_value: keyData.key,
-          maps: [map_name]
-        });
-    } else {
-      // User already has a key, update it
-      const existingMaps = existingUserKey.maps || [];
-      
-      // Check if the map is already in the user's key
-      if (existingMaps.includes(map_name)) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Map already purchased',
-            key: existingUserKey.key_value,
-            maps: existingMaps
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-        );
-      }
-
-      // Get the key from keys table
-      const { data: keyDetails, error: keyDetailsError } = await supabase
-        .from('keys')
-        .select('*')
-        .eq('key', existingUserKey.key_value)
-        .single();
-
-      if (keyDetailsError || !keyDetails) {
-        console.error('Error fetching key details:', keyDetailsError);
-        return new Response(
-          JSON.stringify({ error: 'Key details not found' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
-        );
-      }
-
-      keyData = keyDetails;
-      
-      // Update existing maps array
-      const updatedMaps = [...existingMaps, map_name];
-      
-      // Get current allowed_place_ids
-      const currentPlaceIds = keyDetails.allowed_place_ids || [];
-      
-      // Convert allowed_place_ids to bigint[] if they are strings
-      const newPlaceIds = mapData.allowed_place_ids.map((id: string) => {
-        // Try to convert to bigint if it's a string number
-        const numId = parseInt(id, 10);
-        return isNaN(numId) ? id : numId;
-      });
-      
-      // Add new allowed_place_ids - avoid duplicates
-      const updatedPlaceIds = [...new Set([...currentPlaceIds, ...newPlaceIds])];
-      
-      // Update user_keys
-      await supabase
-        .from('user_keys')
-        .update({
-          maps: updatedMaps
-        })
-        .eq('user_id', user_id)
-        .eq('key_value', existingUserKey.key_value);
-      
-      // Update the key
-      await supabase
-        .from('keys')
-        .update({
-          maps: updatedMaps,
-          allowed_place_ids: updatedPlaceIds
-        })
-        .eq('key', existingUserKey.key_value);
+    if (keyError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'No keys available',
+          message: 'No keys are available for purchase at this time'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
-    // Deduct balance
-    const newBalance = userData.balance - mapData.price;
-    await supabase
+    // Begin transaction: Update user balance
+    const newBalance = userBalance - mapPrice;
+    const { error: updateBalanceError } = await supabase
       .from('user_balances')
-      .update({
+      .update({ 
         balance: newBalance,
         updated_at: new Date().toISOString()
       })
       .eq('id', user_id);
 
-    // Record transaction
-    await supabase
+    if (updateBalanceError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to update balance',
+          message: updateBalanceError.message
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    // Record the transaction
+    const { error: transactionError } = await supabase
       .from('transactions')
       .insert({
         user_id,
-        amount: -mapData.price,
+        amount: mapPrice,
         transaction_type: 'purchase',
         description: `Purchase of ${map_name} map`
       });
 
-    // Get user profile
+    if (transactionError) {
+      console.error('Error recording transaction:', transactionError);
+      // Continue anyway, as this is not critical
+    }
+
+    // Update the key with map information
+    const { error: updateKeyError } = await supabase
+      .from('keys')
+      .update({
+        maps: [map_name],
+        allowed_place_ids: mapData.allowed_place_ids
+      })
+      .eq('id', keyData.id);
+
+    if (updateKeyError) {
+      // Attempt to rollback the balance changes
+      await supabase
+        .from('user_balances')
+        .update({ 
+          balance: userBalance,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user_id);
+
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to update key',
+          message: updateKeyError.message
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    // Associate the key with the user
+    const { error: userKeyError } = await supabase
+      .from('user_keys')
+      .insert({
+        user_id,
+        key_value: keyData.key,
+        maps: [map_name],
+        purchased_at: new Date().toISOString()
+      });
+
+    if (userKeyError) {
+      console.error('Error associating key with user:', userKeyError);
+      // Not rolling back here as the key is already updated
+    }
+
+    // Fetch user profile for webhook
     const { data: profileData } = await supabase
       .from('profiles')
       .select('nickname')
       .eq('id', user_id)
       .single();
 
-    // Send webhook
+    // Send webhook to Discord
     try {
       await fetch(WEBHOOK_URL, {
         method: 'POST',
@@ -231,20 +188,20 @@ serve(async (req) => {
         body: JSON.stringify({
           embeds: [{
             title: '🛒 Purchase Successful',
-            description: `User **${profileData?.nickname || user_id}** has purchased **${map_name}** for **${mapData.price} THB**`,
+            description: `User **${profileData?.nickname || user_id}** purchased **${map_name}** for **${mapPrice} THB**`,
+            color: 5814783, // Light pink
             fields: [
               {
-                name: 'Key',
-                value: keyData.key,
+                name: "Key",
+                value: `\`${keyData.key}\``,
                 inline: true
               },
               {
-                name: 'New Balance',
-                value: `${newBalance} THB`,
+                name: "New Balance",
+                value: `${newBalance.toFixed(2)} THB`,
                 inline: true
               }
             ],
-            color: 5814783, // Light pink
             timestamp: new Date().toISOString()
           }]
         })
@@ -253,49 +210,19 @@ serve(async (req) => {
       console.error('Failed to send webhook:', webhookError);
     }
 
-    // Check if keys are running low (less than 10) and notify via webhook
-    const { count } = await supabase
-      .from('keys')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'Pending')
-      .is('hwid', null)
-      .or('maps.len().eq.0,maps.eq.{}');
-
-    if (count !== null && count < 10) {
-      try {
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            embeds: [{
-              title: '⚠️ Low Key Stock Alert',
-              description: `Only **${count}** keys left in stock!`,
-              color: 16711680, // Red
-              timestamp: new Date().toISOString()
-            }]
-          })
-        });
-      } catch (webhookError) {
-        console.error('Failed to send low stock webhook:', webhookError);
-      }
-    }
-
     return new Response(
       JSON.stringify({
         success: true,
+        message: `Successfully purchased ${map_name} map`,
         key: keyData.key,
-        maps: existingUserKey ? [...existingUserKey.maps, map_name] : [map_name],
-        new_balance: newBalance,
-        message: 'Purchase successful'
+        new_balance: newBalance
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error processing purchase:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error', message: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
