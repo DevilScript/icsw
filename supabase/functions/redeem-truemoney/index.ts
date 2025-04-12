@@ -22,11 +22,6 @@ serve(async (req) => {
     const { voucher_code, user_id } = await req.json();
 
     if (!voucher_code || !user_id) {
-      await supabase.from('logs').insert({
-        user_id: user_id || 'unknown',
-        action: 'validation_failed',
-        details: JSON.stringify({ error: 'Voucher code or user ID missing' }),
-      });
       return new Response(
         JSON.stringify({ error: 'Voucher code and user ID are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -43,11 +38,6 @@ serve(async (req) => {
     // Validate voucher format (alphanumeric, any length)
     const voucher_regex = /^[a-zA-Z0-9]+$/;
     if (!voucher_regex.test(cleanedVoucher)) {
-      await supabase.from('logs').insert({
-        user_id,
-        action: 'voucher_validation_failed',
-        details: JSON.stringify({ voucher_code: cleanedVoucher, error: 'Invalid format' }),
-      });
       return new Response(
         JSON.stringify({
           error: 'Invalid voucher format',
@@ -76,11 +66,6 @@ serve(async (req) => {
       );
       truemoneyData = await truemoneyResponse.json();
     } catch (error) {
-      await supabase.from('logs').insert({
-        user_id,
-        action: 'truemoney_api_error',
-        details: JSON.stringify({ voucher_code: cleanedVoucher, error: 'API timeout or network error' }),
-      });
       throw new Error('TrueMoney API timeout or network error');
     } finally {
       clearTimeout(timeoutId);
@@ -94,11 +79,6 @@ serve(async (req) => {
           : truemoneyData.status?.code === 'INVALID_VOUCHER'
           ? 'INVALID_VOUCHER'
           : truemoneyData.message || 'Failed to redeem voucher';
-      await supabase.from('logs').insert({
-        user_id,
-        action: 'truemoney_api_failed',
-        details: JSON.stringify({ voucher_code: cleanedVoucher, error: errorMessage }),
-      });
       return new Response(
         JSON.stringify({ error: 'Failed to redeem voucher', message: errorMessage }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -107,11 +87,6 @@ serve(async (req) => {
 
     const amount = parseFloat(truemoneyData.data?.amount_baht || truemoneyData.amount || '0');
     if (!amount || amount <= 0) {
-      await supabase.from('logs').insert({
-        user_id,
-        action: 'invalid_amount',
-        details: JSON.stringify({ voucher_code: cleanedVoucher, amount }),
-      });
       return new Response(
         JSON.stringify({ error: 'Invalid voucher amount' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -127,11 +102,6 @@ serve(async (req) => {
     });
 
     if (txError) {
-      await supabase.from('logs').insert({
-        user_id,
-        action: 'transaction_failed',
-        details: JSON.stringify({ voucher_code: cleanedVoucher, error: txError.message }),
-      });
       throw new Error('Failed to process transaction');
     }
 
@@ -161,18 +131,8 @@ serve(async (req) => {
         });
       } catch (webhookError) {
         console.error('Failed to send webhook:', webhookError);
-        await supabase.from('webhook_retries').insert({
-          payload: JSON.stringify({ user_id, amount, nickname: profileData?.nickname }),
-          error: webhookError.message,
-        });
       }
     }, 0);
-
-    await supabase.from('logs').insert({
-      user_id,
-      action: 'topup_success',
-      details: JSON.stringify({ voucher_code: cleanedVoucher, amount }),
-    });
 
     return new Response(
       JSON.stringify({ success: true, amount, message: 'Voucher redeemed successfully' }),
@@ -180,11 +140,6 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error:', error);
-    await supabase.from('logs').insert({
-      user_id: user_id || 'unknown',
-      action: 'topup_error',
-      details: JSON.stringify({ error: error.message }),
-    });
     return new Response(
       JSON.stringify({ error: error.message || 'Internal server error' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
