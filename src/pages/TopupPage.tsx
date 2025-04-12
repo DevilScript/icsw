@@ -243,7 +243,7 @@ const TopupPage = () => {
                   className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  Enter the voucher code or paste the full URL. Example: https://gift.truemoney.com/campaign/?v=019629c02c5071adbf9e8a88ba65887ed22
+                  Enter the voucher code or paste the full URL. Example: https://gift.truemoney.com/campaign/?v=xxxxxxxxxxxxxxxxxxxxxxx
                 </p>
               </div>
 
