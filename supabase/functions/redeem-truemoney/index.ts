@@ -22,24 +22,36 @@ serve(async (req) => {
     const { voucher_code, user_id } = await req.json();
 
     if (!voucher_code || !user_id) {
+      await supabase.from('logs').insert({
+        user_id: user_id || 'unknown',
+        action: 'validation_failed',
+        details: JSON.stringify({ error: 'Voucher code or user ID missing' }),
+      });
       return new Response(
         JSON.stringify({ error: 'Voucher code and user ID are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
-    // Validate voucher format (allow 18 or 35 characters, alphanumeric only)
-    const voucher_regex = /^[a-zA-Z0-9]{18}$|^[a-zA-Z0-9]{35}$/;
-    if (!voucher_regex.test(voucher_code)) {
+    // Extract voucher code from URL if provided
+    let cleanedVoucher = voucher_code;
+    if (voucher_code.includes('gift.truemoney.com')) {
+      const urlParams = new URLSearchParams(voucher_code.split('?')[1] || '');
+      cleanedVoucher = urlParams.get('v') || voucher_code;
+    }
+
+    // Validate voucher format (alphanumeric, any length)
+    const voucher_regex = /^[a-zA-Z0-9]+$/;
+    if (!voucher_regex.test(cleanedVoucher)) {
       await supabase.from('logs').insert({
         user_id,
         action: 'voucher_validation_failed',
-        details: JSON.stringify({ voucher_code, error: 'Invalid format' }),
+        details: JSON.stringify({ voucher_code: cleanedVoucher, error: 'Invalid format' }),
       });
       return new Response(
         JSON.stringify({
           error: 'Invalid voucher format',
-          message: 'Voucher must be 18 or 35 characters (letters and numbers only)',
+          message: 'Voucher must contain only letters and numbers',
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
@@ -51,19 +63,24 @@ serve(async (req) => {
     let truemoneyData;
     try {
       const truemoneyResponse = await fetch(
-        `https://gift.truemoney.com/campaign/vouchers/${voucher_code}/redeem`,
+        `https://gift.truemoney.com/campaign/vouchers/${cleanedVoucher}/redeem`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mobile: MOBILE_NUMBER,
-            voucher_hash: voucher_code,
+            voucher_hash: cleanedVoucher,
           }),
           signal: controller.signal,
         }
       );
       truemoneyData = await truemoneyResponse.json();
     } catch (error) {
+      await supabase.from('logs').insert({
+        user_id,
+        action: 'truemoney_api_error',
+        details: JSON.stringify({ voucher_code: cleanedVoucher, error: 'API timeout or network error' }),
+      });
       throw new Error('TrueMoney API timeout or network error');
     } finally {
       clearTimeout(timeoutId);
@@ -80,7 +97,7 @@ serve(async (req) => {
       await supabase.from('logs').insert({
         user_id,
         action: 'truemoney_api_failed',
-        details: JSON.stringify({ voucher_code, error: errorMessage }),
+        details: JSON.stringify({ voucher_code: cleanedVoucher, error: errorMessage }),
       });
       return new Response(
         JSON.stringify({ error: 'Failed to redeem voucher', message: errorMessage }),
@@ -93,7 +110,7 @@ serve(async (req) => {
       await supabase.from('logs').insert({
         user_id,
         action: 'invalid_amount',
-        details: JSON.stringify({ voucher_code, amount }),
+        details: JSON.stringify({ voucher_code: cleanedVoucher, amount }),
       });
       return new Response(
         JSON.stringify({ error: 'Invalid voucher amount' }),
@@ -105,7 +122,7 @@ serve(async (req) => {
     const { error: txError } = await supabase.rpc('process_topup', {
       p_user_id: user_id,
       p_amount: amount,
-      p_voucher_code: voucher_code,
+      p_voucher_code: cleanedVoucher,
       p_description: 'TrueMoney Wallet Gift Voucher',
     });
 
@@ -113,7 +130,7 @@ serve(async (req) => {
       await supabase.from('logs').insert({
         user_id,
         action: 'transaction_failed',
-        details: JSON.stringify({ voucher_code, error: txError.message }),
+        details: JSON.stringify({ voucher_code: cleanedVoucher, error: txError.message }),
       });
       throw new Error('Failed to process transaction');
     }
@@ -154,7 +171,7 @@ serve(async (req) => {
     await supabase.from('logs').insert({
       user_id,
       action: 'topup_success',
-      details: JSON.stringify({ voucher_code, amount }),
+      details: JSON.stringify({ voucher_code: cleanedVoucher, amount }),
     });
 
     return new Response(
