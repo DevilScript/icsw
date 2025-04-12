@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,33 +25,41 @@ const TopupPage = () => {
     }
   }, [userBalance]);
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!user && !loading) {
       toast({
-        title: "Authentication required",
-        description: "Please login to access this page",
-        variant: "destructive"
+        title: 'Authentication required',
+        description: 'Please login to access this page',
+        variant: 'destructive',
       });
       navigate('/auth');
     }
   }, [user, loading, navigate]);
 
   const handleVoucherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVoucher(e.target.value);
+    const cleanedVoucher = e.target.value.trim().replace(/[^a-zA-Z0-9-]/g, '');
+    setVoucher(cleanedVoucher);
   };
 
   const validateVoucher = (code: string) => {
-    const regex = /^[a-zA-Z0-9]{18}$/;
-    return regex.test(code);
+    const regex = /^[a-zA-Z0-9-]{18}$/;
+    if (!regex.test(code)) {
+      toast({
+        title: 'Invalid voucher',
+        description: 'Voucher must be exactly 18 characters (letters, numbers, or hyphens) with no spaces or special characters.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    return true;
   };
 
   const handleTopup = async () => {
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please login to topup your account",
-        variant: "destructive"
+        title: 'Authentication required',
+        description: 'Please login to topup your account',
+        variant: 'destructive',
       });
       navigate('/auth');
       return;
@@ -60,68 +67,71 @@ const TopupPage = () => {
 
     if (!voucher) {
       toast({
-        title: "Voucher required",
-        description: "Please enter a TrueMoney voucher code",
-        variant: "destructive"
+        title: 'Voucher required',
+        description: 'Please enter a TrueMoney voucher code',
+        variant: 'destructive',
       });
       return;
     }
 
     if (!validateVoucher(voucher)) {
-      toast({
-        title: "Invalid voucher",
-        description: "Please enter a valid 18-character TrueMoney voucher code",
-        variant: "destructive"
-      });
       return;
     }
 
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
+
     try {
-      // Store the old balance before topup
       if (userBalance) {
         setOldBalance(userBalance.balance);
       }
 
       const { data, error } = await supabase.functions.invoke('redeem-truemoney', {
-        body: { voucher_code: voucher, user_id: user.id }
+        body: { voucher_code: voucher, user_id: user.id },
+        signal: controller.signal,
       });
 
-      if (error) throw error;
+      clearTimeout(timeoutId);
+
+      if (error) {
+        throw new Error(error.message || 'Unknown error');
+      }
 
       if (data.success) {
-        // Show animation when topup is successful
         setShowBalanceAnimation(true);
-
-        // Update new balance for animation
         setNewBalance(oldBalance + data.amount);
-
         toast({
-          title: "Topup successful!",
+          title: 'Topup successful!',
           description: `Added ${data.amount} THB to your account`,
-          className: "bg-gray-800 border-green-500 text-white",
+          className: 'bg-gray-800 border-green-500 text-white',
         });
-        
         setVoucher('');
         await refreshUserData();
-
-        // Hide animation after some time
-        setTimeout(() => {
-          setShowBalanceAnimation(false);
-        }, 3000);
+        setTimeout(() => setShowBalanceAnimation(false), 3000);
       } else {
+        const errorMessage =
+          data.message === 'VOUCHER_ALREADY_REDEEMED'
+            ? 'This voucher has already been used.'
+            : data.message === 'INVALID_VOUCHER'
+            ? 'The voucher code is invalid. Please check and try again.'
+            : data.message || 'Failed to redeem voucher. Please try again.';
         toast({
-          title: "Topup failed",
-          description: data.message || "Please try again",
-          variant: "destructive"
+          title: 'Topup failed',
+          description: errorMessage,
+          variant: 'destructive',
         });
       }
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Error during topup:', error);
       toast({
-        title: "Topup failed",
-        description: error.message || "An error occurred during topup",
-        variant: "destructive"
+        title: 'Topup failed',
+        description:
+          error.name === 'AbortError'
+            ? 'Request timed out. Please try again.'
+            : error.message || 'An error occurred during topup',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -130,7 +140,6 @@ const TopupPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-deepBlack via-darkGray/70 to-deepBlack text-white">
-      {/* Custom cursor */}
       <style>
         {`
         body {
@@ -139,8 +148,6 @@ const TopupPage = () => {
         a, button, [role="button"], select, input, label {
           cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='10' cy='10' r='8' fill='rgba(255,179,209,0.8)' /></svg>"), pointer !important;
         }
-        
-        /* Hover effects for sections */
         .section-hover:hover {
           background-color: rgba(255, 179, 209, 0.05);
           box-shadow: 0 0 20px rgba(255, 179, 209, 0.2);
@@ -148,28 +155,26 @@ const TopupPage = () => {
         }
         `}
       </style>
-      
-      {/* Background elements */}
+
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute top-1/3 left-0 w-96 h-96 bg-pastelPink/5 rounded-full filter blur-[120px]"></div>
         <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-gray-500/5 rounded-full filter blur-[100px]"></div>
       </div>
-      
+
       <div className="relative z-10">
         <Navbar onLoginClick={() => navigate('/auth')} />
-        
+
         <div className="container mx-auto px-4 pt-32 pb-16">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="max-w-md mx-auto glass-effect border border-pastelPink/30 p-8 rounded-xl shadow-[0_0_20px_rgba(255,179,209,0.15)]"
           >
             <h1 className="text-2xl font-bold text-center mb-2">Topup Your Account</h1>
-            
+
             <div className="text-center mb-6">
               <p className="text-gray-400">Current Balance</p>
-              
               <AnimatePresence mode="wait">
                 {showBalanceAnimation ? (
                   <motion.div
@@ -203,28 +208,29 @@ const TopupPage = () => {
                     animate={{ opacity: 1 }}
                     className="text-2xl font-bold text-pastelPink"
                   >
-                    {userBalance ? userBalance.balance.toFixed(2) : "0.00"} THB
+                    {userBalance ? userBalance.balance.toFixed(2) : '0.00'} THB
                   </motion.p>
                 )}
               </AnimatePresence>
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   TrueMoney Voucher Code
                 </label>
-                <Input 
+                <Input
                   value={voucher}
                   onChange={handleVoucherChange}
                   placeholder="Enter 18-character code"
                   className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
+                  maxLength={18}
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  Enter the code from your TrueMoney gift voucher
+                  {voucher.length}/18 characters entered. Use letters, numbers, or hyphens only.
                 </p>
               </div>
-              
+
               <Button
                 onClick={handleTopup}
                 disabled={loading || !voucher}
@@ -232,14 +238,14 @@ const TopupPage = () => {
               >
                 {loading ? 'Processing...' : 'Add Funds'}
               </Button>
-              
+
               <div className="text-center text-sm text-gray-400">
                 <p>Need help? Contact support via Discord</p>
               </div>
             </div>
           </motion.div>
         </div>
-        
+
         <Footer />
       </div>
     </div>
