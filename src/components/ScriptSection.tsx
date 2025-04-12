@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { getScriptKeys, supabase } from "@/integrations/supabase/client";
+import { countExternalPendingKeys } from "@/integrations/supabase/external-client";
 import { useAuth } from '@/context/auth';
 
 const sampleScripts = [
@@ -55,15 +55,26 @@ const ScriptSection = () => {
   const [scriptKey, setScriptKey] = useState<string>("");
   const [isKeyVerified, setIsKeyVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [availableKeys, setAvailableKeys] = useState<number>(0);
   const scriptRef = useRef<HTMLDivElement>(null);
   const keyInputRef = useRef<HTMLInputElement>(null);
   const { user, userKeys } = useAuth();
 
   useEffect(() => {
-    // If user is logged in and has keys, pre-fill the key field
     if (user && userKeys && userKeys.length > 0 && userKeys[0].key_value) {
       setScriptKey(userKeys[0].key_value);
     }
+    
+    const fetchKeyCount = async () => {
+      try {
+        const { count } = await countExternalPendingKeys();
+        setAvailableKeys(count);
+      } catch (error) {
+        console.error("Error fetching key count:", error);
+      }
+    };
+    
+    fetchKeyCount();
   }, [user, userKeys]);
 
   const copyToClipboard = (text: string, index: number) => {
@@ -82,7 +93,6 @@ const ScriptSection = () => {
   const handleScriptChange = (value: string) => {
     setSelectedScript(value);
     
-    // If it's a free script, auto-verify
     const script = sampleScripts[parseInt(value)];
     if (script && script.name.toLowerCase().includes("free")) {
       setIsKeyVerified(true);
@@ -103,7 +113,6 @@ const ScriptSection = () => {
     setIsVerifying(true);
     
     try {
-      // Check if the key exists in the keys table
       const { data: keyData, error: keyError } = await supabase
         .from('keys')
         .select('*')
@@ -125,7 +134,6 @@ const ScriptSection = () => {
           className: "bg-gray-800 border-green-500 text-white",
         });
         
-        // Scroll to script if needed
         if (scriptRef.current) {
           setTimeout(() => {
             scriptRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -154,13 +162,11 @@ const ScriptSection = () => {
     }
   };
 
-  // Get script code with user's key if authenticated
   const getScriptCodeWithKey = () => {
     if (!currentScript) return "";
     
     let code = currentScript.code;
     
-    // Replace placeholder with user's actual key if available
     if (currentScript.id === "loader" && scriptKey) {
       code = code.replace("YOUR_KEY_HERE", scriptKey);
     }
@@ -195,7 +201,6 @@ const ScriptSection = () => {
         </motion.p>
         
         <div className="max-w-3xl mx-auto">
-          {/* Script Selection Dropdown */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -219,9 +224,14 @@ const ScriptSection = () => {
                 ))}
               </SelectContent>
             </Select>
+            
+            {requiresKey && (
+              <div className="mt-2 text-right">
+                <span className="text-xs text-pastelPink">Available licenses: {availableKeys}</span>
+              </div>
+            )}
           </motion.div>
           
-          {/* Key Verification Form */}
           {selectedScript !== "" && !isKeyVerified && requiresKey && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -275,7 +285,6 @@ const ScriptSection = () => {
             </motion.div>
           )}
           
-          {/* Script Display with Animation */}
           <AnimatePresence mode="wait">
             {isExpanded && isKeyVerified && (
               <motion.div 

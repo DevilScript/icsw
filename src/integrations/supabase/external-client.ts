@@ -23,6 +23,22 @@ export const getExternalPendingKeys = async () => {
   return { data, error };
 };
 
+// Count pending keys from external database
+export const countExternalPendingKeys = async () => {
+  const { count, error } = await externalSupabase
+    .from('keys')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'Pending')
+    .is('hwid', null);
+  
+  if (error) {
+    console.error('Error counting external pending keys:', error);
+    throw error;
+  }
+  
+  return { count: count || 0, error };
+};
+
 // Function to synchronize keys between projects
 export const syncExternalKeysToLocal = async () => {
   try {

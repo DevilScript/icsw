@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getMapDefinitions, countAvailableKeys, supabase } from '@/integrations/supabase/client';
+import { getMapDefinitions, supabase } from '@/integrations/supabase/client';
+import { countExternalPendingKeys } from '@/integrations/supabase/external-client';
 import { ShoppingCart, Package, Check, X } from 'lucide-react';
 import { MapDefinition } from '@/context/auth/types';
 
@@ -74,7 +74,7 @@ const StorePage = () => {
           setMaps(validMaps);
         }
         
-        const { count, error: countError } = await countAvailableKeys();
+        const { count, error: countError } = await countExternalPendingKeys();
         
         if (countError) {
           console.error('Error counting available keys:', countError);

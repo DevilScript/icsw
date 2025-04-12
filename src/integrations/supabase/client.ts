@@ -90,23 +90,6 @@ export const updateKeyWithMap = async (key: string, mapName: string, placeIds: a
   return { data, error };
 };
 
-// Count available keys
-export const countAvailableKeys = async () => {
-  const { count, error } = await supabase
-    .from('keys')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'Pending')
-    .is('hwid', null)
-    .or('maps.len().eq.0,maps.eq.{}');
-  
-  if (error) {
-    console.error('Error counting available keys:', error);
-    throw error;
-  }
-  
-  return { count, error };
-};
-
 // Functions for user balances
 export const getUserBalance = async (userId: string) => {
   const { data, error } = await supabase
