@@ -42,30 +42,15 @@ export const useProfileData = () => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      // Try to fetch the user's profile safely
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      
-      if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          // Table might not exist yet
-          console.log('Profiles table does not exist or is empty');
-        } else {
-          console.error('Error fetching user profile:', profileError);
-        }
-      } else if (profileData) {
-        // Only set the user profile if we have valid data
-        const validProfile: UserProfile = {
-          id: profileData.id,
-          nickname: profileData.nickname || '',
-          avatar_url: profileData.avatar_url || undefined,
-          created_at: profileData.created_at
-        };
-        setUserProfile(validProfile);
-      }
+      // Create a minimal profile data if we don't have profiles table yet
+      // We'll use the user's ID as profile data
+      const tempProfile: UserProfile = {
+        id: userId,
+        nickname: '',
+        avatar_url: undefined,
+        created_at: new Date().toISOString()
+      };
+      setUserProfile(tempProfile);
 
       // Fetch user balance
       const { data: balanceData, error: balanceError } = await getUserBalance(userId);

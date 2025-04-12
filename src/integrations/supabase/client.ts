@@ -30,9 +30,9 @@ export const supabase = createClient<Database>(_SUPABASE.URL, _SUPABASE.KEY, {
   }
 });
 
-// Function to safely query the script_keys table
+// Function to safely query the keys table
 export const getScriptKeys = async () => {
-  return supabase.from('script_keys').select('*');
+  return supabase.from('keys').select('*');
 };
 
 // Function to safely query the keys table
