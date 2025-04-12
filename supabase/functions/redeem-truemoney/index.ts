@@ -28,8 +28,8 @@ serve(async (req) => {
       );
     }
 
-    // Validate voucher format (allow letters, numbers, and hyphens)
-    const voucher_regex = /^[a-zA-Z0-9-]{18}$/;
+    // Validate voucher format (allow 18 or 35 characters, alphanumeric only)
+    const voucher_regex = /^[a-zA-Z0-9]{18}$|^[a-zA-Z0-9]{35}$/;
     if (!voucher_regex.test(voucher_code)) {
       await supabase.from('logs').insert({
         user_id,
@@ -37,14 +37,17 @@ serve(async (req) => {
         details: JSON.stringify({ voucher_code, error: 'Invalid format' }),
       });
       return new Response(
-        JSON.stringify({ error: 'Invalid voucher format', message: 'Voucher must be 18 characters (letters, numbers, or hyphens)' }),
+        JSON.stringify({
+          error: 'Invalid voucher format',
+          message: 'Voucher must be 18 or 35 characters (letters and numbers only)',
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
     // Call TrueMoney API with timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     let truemoneyData;
     try {
       const truemoneyResponse = await fetch(
@@ -98,7 +101,7 @@ serve(async (req) => {
       );
     }
 
-    // Process balance update and transaction in a single transaction
+    // Process balance update and transaction
     const { error: txError } = await supabase.rpc('process_topup', {
       p_user_id: user_id,
       p_amount: amount,
@@ -129,12 +132,14 @@ serve(async (req) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            embeds: [{
-              title: '💰 Topup Successful',
-              description: `User **${profileData?.nickname || user_id}** has added **${amount} THB** to their account`,
-              color: 5814783,
-              timestamp: new Date().toISOString(),
-            }],
+            embeds: [
+              {
+                title: '💰 Topup Successful',
+                description: `User **${profileData?.nickname || user_id}** has added **${amount} THB** to their account`,
+                color: 5814783,
+                timestamp: new Date().toISOString(),
+              },
+            ],
           }),
         });
       } catch (webhookError) {
