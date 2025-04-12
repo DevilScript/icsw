@@ -37,7 +37,6 @@ const TopupPage = () => {
   }, [user, loading, navigate]);
 
   const extractVoucherFromUrl = (input: string): string => {
-    // Check if input is a URL and extract the voucher code
     if (input.includes('gift.truemoney.com')) {
       const urlParams = new URLSearchParams(input.split('?')[1] || '');
       return urlParams.get('v') || input;
@@ -52,11 +51,19 @@ const TopupPage = () => {
   };
 
   const validateVoucher = (code: string) => {
-    const regex = /^[a-zA-Z0-9]{18}$|^[a-zA-Z0-9]{35}$/;
+    const regex = /^[a-zA-Z0-9]+$/;
     if (!regex.test(code)) {
       toast({
         title: 'Invalid voucher',
-        description: 'Voucher must be 18 or 35 characters (letters and numbers only). Example: 019629c02c5071adbf9e8a88ba65887ed22',
+        description: 'Voucher must contain only letters and numbers. Example: 019629c02c5071adbf9e8a88ba65887ed22',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    if (code.length < 10) {
+      toast({
+        title: 'Invalid voucher',
+        description: 'Voucher code is too short. Please enter a valid TrueMoney voucher code.',
         variant: 'destructive',
       });
       return false;
@@ -232,12 +239,11 @@ const TopupPage = () => {
                 <Input
                   value={voucher}
                   onChange={handleVoucherChange}
-                  placeholder="e.g., 019629c02c5071adbf9e8a88ba65887ed22"
+                  placeholder="e.g., 019629c02c5071adbf9e8a88ba65887ed22 or URL"
                   className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
-                  maxLength={35}
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  {voucher.length}/35 characters entered. Enter the voucher code only (letters and numbers). If you have a URL, copy the code after "?v=".
+                  Enter the voucher code or paste the full URL. Example: https://gift.truemoney.com/campaign/?v=019629c02c5071adbf9e8a88ba65887ed22
                 </p>
               </div>
 
