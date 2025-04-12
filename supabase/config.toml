@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.reset-hwid]
 verify_jwt = false
+
+[functions.sync-keys]
+verify_jwt = false
