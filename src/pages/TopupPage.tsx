@@ -36,17 +36,27 @@ const TopupPage = () => {
     }
   }, [user, loading, navigate]);
 
+  const extractVoucherFromUrl = (input: string): string => {
+    // Check if input is a URL and extract the voucher code
+    if (input.includes('gift.truemoney.com')) {
+      const urlParams = new URLSearchParams(input.split('?')[1] || '');
+      return urlParams.get('v') || input;
+    }
+    return input;
+  };
+
   const handleVoucherChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cleanedVoucher = e.target.value.trim().replace(/[^a-zA-Z0-9-]/g, '');
+    const input = e.target.value.trim();
+    const cleanedVoucher = extractVoucherFromUrl(input).replace(/[^a-zA-Z0-9]/g, '');
     setVoucher(cleanedVoucher);
   };
 
   const validateVoucher = (code: string) => {
-    const regex = /^[a-zA-Z0-9-]{18}$/;
+    const regex = /^[a-zA-Z0-9]{18}$|^[a-zA-Z0-9]{35}$/;
     if (!regex.test(code)) {
       toast({
         title: 'Invalid voucher',
-        description: 'Voucher must be exactly 18 characters (letters, numbers, or hyphens) with no spaces or special characters.',
+        description: 'Voucher must be 18 or 35 characters (letters and numbers only). Example: 019629c02c5071adbf9e8a88ba65887ed22',
         variant: 'destructive',
       });
       return false;
@@ -80,7 +90,7 @@ const TopupPage = () => {
 
     setLoading(true);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       if (userBalance) {
@@ -222,12 +232,12 @@ const TopupPage = () => {
                 <Input
                   value={voucher}
                   onChange={handleVoucherChange}
-                  placeholder="Enter 18-character code"
+                  placeholder="e.g., 019629c02c5071adbf9e8a88ba65887ed22"
                   className="bg-gray-900/50 border-pastelPink/30 focus:border-pastelPink"
-                  maxLength={18}
+                  maxLength={35}
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  {voucher.length}/18 characters entered. Use letters, numbers, or hyphens only.
+                  {voucher.length}/35 characters entered. Enter the voucher code only (letters and numbers). If you have a URL, copy the code after "?v=".
                 </p>
               </div>
 
