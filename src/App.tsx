@@ -12,6 +12,7 @@ import TopupPage from "./pages/TopupPage";
 import StorePage from "./pages/StorePage";
 import HistoryPage from "./pages/HistoryPage";
 import ResetHWIDPage from "./pages/ResetHWIDPage";
+import AdminPage from "./pages/AdminPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/store" element={<StorePage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/reset-hwid" element={<ResetHWIDPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

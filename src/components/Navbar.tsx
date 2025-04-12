@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Clock,
   RefreshCw,
+  ShieldAlert
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from '@/context/auth';
