@@ -16,10 +16,15 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    // Create Supabase client for local database
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Create Supabase client for external database
+    const externalSupabaseUrl = 'https://eusxbcbwyhjtfjplwtst.supabase.co';
+    const externalSupabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1c3hiY2J3eWhqdGZqcGx3dHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzNTEzOTksImV4cCI6MjA1OTkyNzM5OX0.d6DTqwlZ4X69orabNA0tzxrucsnVv531dqzUcsxum6E';
+    const externalSupabase = createClient(externalSupabaseUrl, externalSupabaseKey);
 
     const { user_id, map_name } = await req.json();
 
@@ -73,8 +78,13 @@ serve(async (req) => {
       );
     }
 
-    // Get an available key
-    const { data: keyData, error: keyError } = await supabase
+    // Get an available key from both databases, prioritizing the local one
+    let keyData = null;
+    let keyError = null;
+    let isExternalKey = false;
+
+    // First, try to get a key from the local database
+    const localKeyResult = await supabase
       .from('keys')
       .select('*')
       .eq('status', 'Pending')
@@ -83,14 +93,31 @@ serve(async (req) => {
       .limit(1)
       .single();
 
-    if (keyError) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'No keys available',
-          message: 'No keys are available for purchase at this time'
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+    if (localKeyResult.error) {
+      console.log('No local key available, trying external database');
+      // If no local key is available, try the external database
+      const externalKeyResult = await externalSupabase
+        .from('keys')
+        .select('*')
+        .eq('status', 'Pending')
+        .is('hwid', null)
+        .limit(1)
+        .single();
+
+      if (externalKeyResult.error) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'No keys available',
+            message: 'No keys are available for purchase at this time'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+
+      keyData = externalKeyResult.data;
+      isExternalKey = true;
+    } else {
+      keyData = localKeyResult.data;
     }
 
     // Begin transaction: Update user balance
@@ -128,14 +155,32 @@ serve(async (req) => {
       // Continue anyway, as this is not critical
     }
 
-    // Update the key with map information
-    const { error: updateKeyError } = await supabase
-      .from('keys')
-      .update({
-        maps: [map_name],
-        allowed_place_ids: mapData.allowed_place_ids
-      })
-      .eq('id', keyData.id);
+    // Update the key with map information in the appropriate database
+    let updateKeyError = null;
+    
+    if (isExternalKey) {
+      // Update in external database
+      const { error } = await externalSupabase
+        .from('keys')
+        .update({
+          maps: [map_name],
+          allowed_place_ids: mapData.allowed_place_ids
+        })
+        .eq('id', keyData.id);
+        
+      updateKeyError = error;
+    } else {
+      // Update in local database
+      const { error } = await supabase
+        .from('keys')
+        .update({
+          maps: [map_name],
+          allowed_place_ids: mapData.allowed_place_ids
+        })
+        .eq('id', keyData.id);
+        
+      updateKeyError = error;
+    }
 
     if (updateKeyError) {
       // Attempt to rollback the balance changes
@@ -200,6 +245,11 @@ serve(async (req) => {
                 name: "New Balance",
                 value: `${newBalance.toFixed(2)} THB`,
                 inline: true
+              },
+              {
+                name: "Source",
+                value: isExternalKey ? "External Database" : "Local Database",
+                inline: true
               }
             ],
             timestamp: new Date().toISOString()
@@ -215,7 +265,8 @@ serve(async (req) => {
         success: true,
         message: `Successfully purchased ${map_name} map`,
         key: keyData.key,
-        new_balance: newBalance
+        new_balance: newBalance,
+        key_source: isExternalKey ? "external" : "local"
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
