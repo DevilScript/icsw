@@ -5,14 +5,18 @@ import { Database } from '../../types/supabase';
 import { AuthMethods } from './types';
 
 export const useAuthMethods = (): AuthMethods => {
-  const supabase = useSupabaseClient<Database>();
+  const supabase = createClient<Database>(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+  );
   const session = useSession();
 
   const signInWithDiscord = useCallback(async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: 'https://icsw.lovable.app',
+        scopes: 'identify',
       },
     });
 
@@ -33,7 +37,7 @@ export const useAuthMethods = (): AuthMethods => {
   }, [supabase]);
 
   const syncUserProfile = useCallback(async (user: User) => {
-    const discordUsername = user.user_metadata.global_name || user.user_metadata.name || user.user_metadata.preferred_username || 'Unknown User';
+    const discordUsername = user.user_metadata.global_name || user.user_metadata.name || 'Unknown User';
     const { data, error } = await supabase
       .from('profiles')
       .upsert({
