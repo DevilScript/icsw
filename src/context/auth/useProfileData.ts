@@ -1,155 +1,45 @@
+import { useEffect, useState } from 'react';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+import type { Database } from '../../types/supabase';
 
-import { useState } from 'react';
-import { supabase, getUserBalance, getUserKeys, createUserBalance } from '@/integrations/supabase/client';
-import { UserProfile, UserBalance, UserKey } from './types';
-
-// Type guard to check if an object has the required UserBalance properties
-const isUserBalanceData = (data: any): data is UserBalance => {
-  return (
-    data && 
-    typeof data === 'object' &&
-    'id' in data && 
-    'balance' in data && 
-    'updated_at' in data &&
-    typeof data.id === 'string' && 
-    typeof data.balance === 'number' && 
-    typeof data.updated_at === 'string'
-  );
-};
-
-// Type guard to check if an object has the required UserKey properties
-const isUserKeyData = (data: any): data is UserKey => {
-  return (
-    data && 
-    typeof data === 'object' &&
-    'id' in data && 
-    'user_id' in data && 
-    'key_value' in data && 
-    'purchased_at' in data && 
-    'maps' in data &&
-    typeof data.id === 'string' && 
-    typeof data.user_id === 'string' && 
-    typeof data.key_value === 'string' && 
-    typeof data.purchased_at === 'string' && 
-    Array.isArray(data.maps)
-  );
+export type ProfileData = {
+  user_id: string;
+  username: string | null;
+  balance: number;
+  avatar_url: string | null;
 };
 
 export const useProfileData = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userBalance, setUserBalance] = useState<UserBalance | null>(null);
-  const [userKeys, setUserKeys] = useState<UserKey[] | null>(null);
+  const supabase = useSupabaseClient<Database>();
+  const session = useSession();
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      // Create a minimal profile data if we don't have profiles table yet
-      // We'll use the user's ID as profile data
-      const tempProfile: UserProfile = {
-        id: userId,
-        nickname: '',
-        avatar_url: undefined,
-        created_at: new Date().toISOString()
-      };
-      setUserProfile(tempProfile);
-
-      // Fetch user balance
-      const { data: balanceData, error: balanceError } = await getUserBalance(userId);
-      
-      if (balanceError) {
-        if (balanceError.code === 'PGRST116') {
-          // Create a new balance entry if it doesn't exist
-          await createUserBalance(userId);
-          // Try fetching again
-          const { data: newBalanceData } = await getUserBalance(userId);
-          
-          // Safe type checking with non-null assertion after check
-          if (newBalanceData && typeof newBalanceData === 'object') {
-            const rawNewData = newBalanceData as any;
-            
-            if ('id' in rawNewData && 
-                'balance' in rawNewData &&
-                'updated_at' in rawNewData) {
-              
-              const validBalance: UserBalance = {
-                id: String(rawNewData.id),
-                balance: Number(rawNewData.balance),
-                updated_at: String(rawNewData.updated_at)
-              };
-              setUserBalance(validBalance);
-            }
-          }
-        } else {
-          console.error('Error fetching user balance:', balanceError);
-        }
-      } else if (balanceData && typeof balanceData === 'object') {
-        // Safe type checking with non-null assertion after check
-        const rawData = balanceData as any;
-        
-        if ('id' in rawData && 
-            'balance' in rawData &&
-            'updated_at' in rawData) {
-          
-          const validBalance: UserBalance = {
-            id: String(rawData.id),
-            balance: Number(rawData.balance),
-            updated_at: String(rawData.updated_at)
-          };
-          setUserBalance(validBalance);
-        }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.user?.id) {
+        setLoading(false);
+        return;
       }
 
-      // Fetch user keys
-      const { data: keysData, error: keysError } = await getUserKeys(userId);
-      
-      if (keysError) {
-        console.error('Error fetching user keys:', keysError);
-      } else if (keysData && Array.isArray(keysData)) {
-        // Make sure we only set valid key data by filtering first
-        const validKeys: UserKey[] = [];
-        
-        // For each item in keysData, check if it's valid and add it to validKeys
-        for (const keyItem of keysData) {
-          if (keyItem && typeof keyItem === 'object') {
-            const key = keyItem as any;
-            
-            // Check if the key has all required properties
-            if (key && 
-                'id' in key && 
-                'user_id' in key && 
-                'key_value' in key && 
-                'purchased_at' in key && 
-                'maps' in key) {
-              
-              validKeys.push({
-                id: String(key.id),
-                user_id: String(key.user_id),
-                key_value: String(key.key_value),
-                purchased_at: String(key.purchased_at),
-                maps: Array.isArray(key.maps) ? key.maps : []
-              });
-            }
-          }
-        }
-        
-        setUserKeys(validKeys);
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, username, balance, avatar_url')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(null);
+      } else {
+        setProfile(data || null);
       }
-    } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-    }
-  };
+      setLoading(false);
+    };
 
-  const refreshUserData = async (userId: string) => {
-    await fetchUserProfile(userId);
-  };
+    fetchProfile();
+  }, [session, supabase]);
 
-  return {
-    userProfile,
-    setUserProfile,
-    userBalance,
-    setUserBalance,
-    userKeys,
-    setUserKeys,
-    fetchUserProfile,
-    refreshUserData
-  };
+  return { profile, loading };
 };
