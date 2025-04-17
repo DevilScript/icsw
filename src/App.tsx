@@ -13,28 +13,6 @@ import StorePage from "./pages/StorePage";
 import HistoryPage from "./pages/HistoryPage";
 import ResetHWIDPage from "./pages/ResetHWIDPage";
 import AdminPage from "./pages/AdminPage";
-import { Component, ReactNode } from 'react';
-
-class ErrorBoundary extends Component<{ children: ReactNode }> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-    return this.props.children;
-  }
-}
-
-const App = () => (
-  <ErrorBoundary>
-    <Routes />
-  </ErrorBoundary>
-);
 
 const queryClient = new QueryClient();
 
