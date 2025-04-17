@@ -4,13 +4,16 @@ export const DiscordLoginButton = () => {
   const { signInWithDiscord } = useAuthMethods();
 
   const handleLogin = () => {
-    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin)}&response_type=code&scope=identify`;
+    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent('https://icsw.lovable.app')}&response_type=code&scope=identify`;
     const popup = window.open(authUrl, 'discordAuth', 'width=600,height=600');
 
     const checkPopup = setInterval(() => {
       if (popup?.closed) {
         clearInterval(checkPopup);
-        signInWithDiscord().catch(err => console.error('Login error:', err));
+        signInWithDiscord().catch(err => {
+          console.error('Login error:', err);
+          alert('Failed to login with Discord');
+        });
       }
     }, 500);
   };
