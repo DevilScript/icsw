@@ -5,18 +5,14 @@ import { Database } from '../../types/supabase';
 import { AuthMethods } from './types';
 
 export const useAuthMethods = (): AuthMethods => {
-  const supabase = createClient<Database>(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-  );
+  const supabase = useSupabaseClient<Database>();
   const session = useSession();
 
   const signInWithDiscord = useCallback(async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: 'https://icsw.lovable.app',
-        scopes: 'identify',
+        redirectTo: window.location.origin,
       },
     });
 
@@ -36,13 +32,13 @@ export const useAuthMethods = (): AuthMethods => {
     }
   }, [supabase]);
 
+  // เพิ่มการ sync ข้อมูลผู้ใช้เมื่อล็อกอิน
   const syncUserProfile = useCallback(async (user: User) => {
-    const discordUsername = user.user_metadata.global_name || user.user_metadata.name || 'Unknown User';
     const { data, error } = await supabase
       .from('profiles')
       .upsert({
         user_id: user.id,
-        username: discordUsername,
+        username: user.user_metadata.name || user.user_metadata.full_name,
         avatar_url: user.user_metadata.avatar_url,
         balance: 0,
       });
@@ -52,10 +48,10 @@ export const useAuthMethods = (): AuthMethods => {
       throw error;
     }
 
-    console.log('Profile synced:', data);
     return data;
   }, [supabase]);
 
+  // เรียก syncUserProfile เมื่อ session เปลี่ยน
   if (session?.user && !session.user.user_metadata.synced) {
     syncUserProfile(session.user).then(() => {
       supabase.auth.updateUser({ data: { synced: true } });
