@@ -32,13 +32,13 @@ export const useAuthMethods = (): AuthMethods => {
     }
   }, [supabase]);
 
-  // เพิ่มการ sync ข้อมูลผู้ใช้เมื่อล็อกอิน
   const syncUserProfile = useCallback(async (user: User) => {
+    const discordUsername = user.user_metadata.global_name || user.user_metadata.name || user.user_metadata.preferred_username || 'Unknown User';
     const { data, error } = await supabase
       .from('profiles')
       .upsert({
         user_id: user.id,
-        username: user.user_metadata.name || user.user_metadata.full_name,
+        username: discordUsername,
         avatar_url: user.user_metadata.avatar_url,
         balance: 0,
       });
@@ -48,10 +48,10 @@ export const useAuthMethods = (): AuthMethods => {
       throw error;
     }
 
+    console.log('Profile synced:', data);
     return data;
   }, [supabase]);
 
-  // เรียก syncUserProfile เมื่อ session เปลี่ยน
   if (session?.user && !session.user.user_metadata.synced) {
     syncUserProfile(session.user).then(() => {
       supabase.auth.updateUser({ data: { synced: true } });
