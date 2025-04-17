@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.lan/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Database } from '../../../types.ts';
 import { corsHeaders } from '../../_shared/cors.ts';
@@ -20,6 +20,22 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'User not authenticated' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
+      });
+    }
+
+    // ตรวจสอบว่า user มีใน profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profile) {
+      await supabase.from('profiles').insert({
+        user_id: user.id,
+        username: user.user_metadata.global_name || 'Unknown User',
+        balance: 0,
+        avatar_url: user.user_metadata.avatar_url,
       });
     }
 
@@ -47,7 +63,6 @@ serve(async (req: Request) => {
 
     const amount = parseFloat(redeemData.amount_baht);
 
-    // เริ่ม transaction
     const { error: txError } = await supabase.rpc('update_balance_and_log_transaction', {
       p_user_id: user.id,
       p_amount: amount,

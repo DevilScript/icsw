@@ -1,4 +1,4 @@
-import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +12,29 @@ import TopupPage from "./pages/TopupPage";
 import StorePage from "./pages/StorePage";
 import HistoryPage from "./pages/HistoryPage";
 import ResetHWIDPage from "./pages/ResetHWIDPage";
+import AdminPage from "./pages/AdminPage";
+import { Component, ReactNode } from 'react';
+
+class ErrorBoundary extends Component<{ children: ReactNode }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
+
+const App = () => (
+  <ErrorBoundary>
+    <Routes />
+  </ErrorBoundary>
+);
 
 const queryClient = new QueryClient();
 
@@ -29,6 +52,8 @@ const App = () => (
             <Route path="/store" element={<StorePage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/reset-hwid" element={<ResetHWIDPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
