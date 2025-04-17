@@ -16,10 +16,12 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import LogoW from './icons/LogoW';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DiscordLoginButton } from './DiscordLoginButton';
 
 interface LoginModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
@@ -39,7 +41,8 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
       });
     }
   };
-
+  
+export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-gray-800/95 backdrop-blur-xl border border-pastelPink/30 sm:max-w-md rounded-xl shadow-[0_0_30px_rgba(255,179,209,0.2)] overflow-hidden">
@@ -115,6 +118,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
       </DialogContent>
     </Dialog>
   );
+};
 };
 
 export default LoginModal;
